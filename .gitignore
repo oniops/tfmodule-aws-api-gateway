@@ -1,0 +1,10 @@
+/.idea/
+**/.terraform/
+/test-modules/
+/logs/
+/dist/
+/target/
+.terraform.lock.hcl
+*.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.backup
