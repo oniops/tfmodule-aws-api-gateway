@@ -80,8 +80,8 @@ API Gateway 리소스를 Stage 런타임 환경으로 배포 합니다.
 
 ## Example
 
-- [simple](./examples/simple/main.tf) 예제는 API Gateway 의 요청을 HTTP 프로토콜 통합하여 Target URI 에 통합 합니다. 
-- [proxy-vpclink](./examples/proxy-vpclink/main.tf) 예제는 API Gateway 의 모든 요청을 VPC Link 연결을 통해 Network Load Balancer 으로 통합 합니다. 
+- [simple](./examples/simple/HELP.md) 예제는 API Gateway 의 요청을 HTTP 프로토콜 통합하여 Target URI 에 통합 합니다. 
+- [proxy-vpclink](./examples/proxy-vpclink/HELP.md) 예제는 API Gateway 의 모든 요청을 VPC Link 연결을 통해 Network Load Balancer 으로 통합 합니다. 
 
 <br>
 
