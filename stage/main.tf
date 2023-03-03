@@ -1,5 +1,5 @@
 locals {
-  cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix,  var.api_name == null ? var.name : var.api_name)
+  cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix, var.api_name == null ? var.name : var.api_name)
   tags                      = var.context.tags
 }
 
@@ -7,10 +7,11 @@ resource "aws_api_gateway_deployment" "this" {
   stage_name        = ""
   stage_description = var.description
   rest_api_id       = var.rest_api_id
-  #  triggers = {
-  #    redeployment = sha1(var.redeployment)
-  #  }
-  #
+
+  triggers          = {
+    redeployment = sha1(var.redeployment)
+  }
+
   lifecycle {
     create_before_destroy = true
   }

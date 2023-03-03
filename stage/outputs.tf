@@ -5,3 +5,7 @@ output "cloudwatch_log_group_name" {
 output "cloudwatch_log_group_arn" {
   value = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
 }
+
+output "name" {
+  value = var.name
+}

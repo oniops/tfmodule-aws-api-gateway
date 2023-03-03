@@ -43,20 +43,20 @@ variable "rest_api_id" {
   description = "The Resource Instance ID of the REST API"
 }
 
-#variable "redeployment" {
-#  type        = string
-#  description = <<EOF
-#This will only trigger redeployment if anything changed in listed files."
-#
-#Ex)
-#  redeployment = jsonencode([
-#    file("main.tf"),
-#    file("apigw_user.tf"),
-#    file("apigw_dept.tf"),
-#  ])
-#EOF
-#  default     = ""
-#}
+variable "redeployment" {
+  type        = string
+  description = <<EOF
+This will only trigger redeployment if anything changed in listed files."
+
+Ex)
+  redeployment = jsonencode([
+    file("main.tf"),
+    file("apigw_user.tf"),
+    file("apigw_dept.tf"),
+  ])
+EOF
+  default     = ""
+}
 
 variable "enable_access_logs" {
   type        = bool
