@@ -53,7 +53,7 @@ resource "aws_api_gateway_integration_response" "this" {
   rest_api_id         = var.parent_ids.rest_api_id
   resource_id         = var.parent_ids.resource_id
   http_method         = concat(aws_api_gateway_method.this.*.http_method, [""])[0]
-  status_code         = local.status_code
+  status_code         = concat(aws_api_gateway_method_response.this.*.status_code, [""])[0]
   selection_pattern   = var.selection_pattern
   response_parameters = var.integration_response_parameters
   content_handling    = var.integration_content_handling
