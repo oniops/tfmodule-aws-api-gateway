@@ -262,8 +262,16 @@ variable "status_code" {
 
 variable "response_models" {
   type        = map(string)
-  description = "A map of the API models used for the response's content type"
-  default     = null
+  description = <<EOF
+A map of the API models used for the response's content type
+
+For example:
+  response_models = {
+    "application/json" = aws_api_gateway_model.response_model.id
+  }
+EOF
+
+  default = null
 }
 
 variable "response_parameters" {
@@ -276,5 +284,6 @@ For example:
     "method.response.header.X-Some-Header" = true
   }
 EOF
-  default     = null
+
+  default = null
 }
