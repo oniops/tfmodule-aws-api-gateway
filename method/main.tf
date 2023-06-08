@@ -58,4 +58,7 @@ resource "aws_api_gateway_integration_response" "this" {
   response_parameters = var.integration_response_parameters
   content_handling    = var.integration_content_handling
   response_templates  = var.response_template
+  depends_on          = [
+    aws_api_gateway_integration.this
+  ]
 }
