@@ -1,6 +1,6 @@
 locals {
   integration_http_method = var.integration_http_method != null ? var.integration_http_method : var.http_method
-  create_response         = var.status_code || var.response_models != null || var.response_parameters != null ? true : false
+  create_response         = var.status_code == null || var.response_models != null || var.response_parameters != null ? true : false
   status_code             = local.create_response && var.status_code == null ? "200" : var.status_code
 }
 
