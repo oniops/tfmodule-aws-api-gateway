@@ -257,7 +257,7 @@ EOF
 variable "status_code" {
   type        = string
   description = "The HTTP status code"
-  default     = "200"
+  default     = null
 }
 
 variable "response_models" {
@@ -286,4 +286,64 @@ For example:
 EOF
 
   default = null
+}
+
+variable "response_template" {
+  type        = map(string)
+  description = <<EOF
+A map of response parameters that can be sent to the caller.
+
+For example:
+  response_template = {
+      "application/xml" = <<E-O-F
+  #set($inputRoot = $input.path('$'))
+  <?xml version="1.0" encoding="UTF-8"?>
+  <message>
+      $inputRoot.body
+  </message>
+  E-O-F
+EOF
+
+  default = null
+}
+
+variable "integration_response_parameters" {
+  type        = map(string)
+  description = <<EOF
+A map of response parameters that can be sent to the caller.
+
+For example:
+  integration_response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+EOF
+
+  default = null
+}
+
+variable "selection_pattern" {
+  type        = string
+  description = <<EOF
+Specifies the regular expression pattern used to choose an integration response based on the response from the backend.
+Omit configuring this to make the integration the default one.
+
+For example:
+  selection_pattern = "Invalid.*"
+  selection_pattern = "2\\d{2}"
+  selection_pattern = "4\\d{2}"
+  selection_pattern = "5\\d{2}"
+EOF
+
+  default = null
+}
+
+variable "integration_content_handling" {
+  type        = string
+  description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
+  default     = null
+  validation {
+    condition     = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.integration_content_handling))
+    #  var.integration_content_handling == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling+"")
+    error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
+  }
 }
