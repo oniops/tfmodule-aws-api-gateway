@@ -8,7 +8,7 @@ locals {
 }
 
 resource "aws_api_gateway_domain_name" "regional" {
-  count                    = local.create_route53_record && var.endpoint_type == "REGIONAL" ? 1 : 0
+  count                    = var.endpoint_type == "REGIONAL" ? 1 : 0
   regional_certificate_arn = data.aws_acm_certificate.this.arn
   domain_name              = local.domain_name
 
@@ -35,7 +35,7 @@ resource "aws_route53_record" "regional" {
 }
 
 resource "aws_api_gateway_domain_name" "edge" {
-  count           = local.create_route53_record && var.endpoint_type == "EDGE" ? 1 : 0
+  count           = var.endpoint_type == "EDGE" ? 1 : 0
   certificate_arn = data.aws_acm_certificate.this.arn
   domain_name     = local.domain_name
 
