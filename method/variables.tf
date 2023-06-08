@@ -209,7 +209,7 @@ variable "content_handling" {
   }
 }
 
-variable "integration_http_method" {
+variable "http_method_integration" {
   type        = string
   description = "HTTP Method one of GET, POST, PUT, DELETE, HEAD, OPTIONs, ANY and PATCH. but AWS integrations. e.g., Lambda function can only be invoked via POST"
   default     = null
@@ -307,13 +307,13 @@ EOF
   default = null
 }
 
-variable "integration_response_parameters" {
+variable "response_parameters_integration" {
   type        = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
 
 For example:
-  integration_response_parameters = {
+  response_parameters_integration = {
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
 EOF
@@ -337,13 +337,13 @@ EOF
   default = null
 }
 
-variable "integration_content_handling" {
+variable "content_handling_integration" {
   type        = string
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition     = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.integration_content_handling))
-    #  var.integration_content_handling == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling+"")
+    condition     = var.content_handling_integration == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
+    #  var.content_handling_integration == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling_integration+"")
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }

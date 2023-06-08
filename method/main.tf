@@ -1,5 +1,5 @@
 locals {
-  integration_http_method = var.integration_http_method != null ? var.integration_http_method : var.http_method
+  integration_http_method = var.http_method_integration != null ? var.http_method_integration : var.http_method
   create_response         = var.status_code == null || var.response_models != null || var.response_parameters != null ? true : false
   status_code             = local.create_response && var.status_code == null ? "200" : var.status_code
 }
@@ -55,8 +55,8 @@ resource "aws_api_gateway_integration_response" "this" {
   http_method         = concat(aws_api_gateway_method.this.*.http_method, [""])[0]
   status_code         = concat(aws_api_gateway_method_response.this.*.status_code, [""])[0]
   selection_pattern   = var.selection_pattern
-  response_parameters = var.integration_response_parameters
-  content_handling    = var.integration_content_handling
+  response_parameters = var.response_parameters_integration
+  content_handling    = var.content_handling_integration
   response_templates  = var.response_template
   depends_on          = [
     aws_api_gateway_integration.this
