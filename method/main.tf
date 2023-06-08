@@ -1,6 +1,7 @@
 locals {
   integration_http_method = var.integration_http_method != null ? var.integration_http_method : var.http_method
   create_response         = var.status_code || var.response_models != null || var.response_parameters != null ? true : false
+  status_code             = local.create_response && var.status_code == null ? "200" : var.status_code
 }
 
 resource "aws_api_gateway_method" "this" {
@@ -21,7 +22,7 @@ resource "aws_api_gateway_method_response" "this" {
   rest_api_id         = var.parent_ids.rest_api_id
   resource_id         = var.parent_ids.resource_id
   http_method         = aws_api_gateway_method.this.http_method
-  status_code         = var.status_code
+  status_code         = local.status_code
   response_models     = var.response_models
   response_parameters = var.response_parameters
 }
@@ -52,7 +53,7 @@ resource "aws_api_gateway_integration_response" "this" {
   rest_api_id         = var.parent_ids.rest_api_id
   resource_id         = var.parent_ids.resource_id
   http_method         = concat(aws_api_gateway_method.this.*.http_method, [""])[0]
-  status_code         = concat(aws_api_gateway_method_response.this.*.status_code, [""])[0]
+  status_code         = local.status_code
   selection_pattern   = var.selection_pattern
   response_parameters = var.integration_response_parameters
   content_handling    = var.integration_content_handling
