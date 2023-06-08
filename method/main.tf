@@ -8,10 +8,21 @@ resource "aws_api_gateway_method" "this" {
   http_method          = var.http_method
   authorization        = var.authorization
   request_parameters   = var.request_parameters
+  request_models       = var.request_models
   authorization_scopes = var.authorization_scopes
   api_key_required     = var.api_key_required
   operation_name       = var.operation_name
   request_validator_id = var.request_validator_id
+}
+
+resource "aws_api_gateway_method_response" "this" {
+  count               = var.response_models != null || var.response_parameters != null ? 1 : 0
+  rest_api_id         = var.parent_ids.rest_api_id
+  resource_id         = var.parent_ids.resource_id
+  http_method         = aws_api_gateway_method.this.http_method
+  status_code         = var.status_code
+  response_models     = var.response_models
+  response_parameters = var.response_parameters
 }
 
 resource "aws_api_gateway_integration" "this" {

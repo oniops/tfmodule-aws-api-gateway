@@ -61,7 +61,6 @@ EOF
   default     = {}
 }
 
-
 variable "authorization_scopes" {
   type        = list(string)
   description = <<EOF
@@ -252,4 +251,30 @@ Ex)
 EOF
 
   default = null
+}
+
+# Response
+variable "status_code" {
+  type        = string
+  description = "The HTTP status code"
+  default     = "200"
+}
+
+variable "response_models" {
+  type        = map(string)
+  description = "A map of the API models used for the response's content type"
+  default     = null
+}
+
+variable "response_parameters" {
+  type        = map(string)
+  description = <<EOF
+A map of response parameters that can be sent to the caller.
+
+For example:
+  response_parameters = {
+    "method.response.header.X-Some-Header" = true
+  }
+EOF
+  default     = null
 }
