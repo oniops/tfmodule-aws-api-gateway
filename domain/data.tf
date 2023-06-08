@@ -3,5 +3,6 @@ data "aws_acm_certificate" "this" {
 }
 
 data "aws_route53_zone" "public" {
-  name = var.context.domain
+  count = local.create_route53_record ? 1 : 0
+  name  = var.context.domain
 }

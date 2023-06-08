@@ -11,3 +11,9 @@ variable "endpoint_type" {
     error_message = "Valid endpoint_type is one of EDGE, REGIONAL."
   }
 }
+
+variable "exists_public_hosting_zone" {
+  type    = bool
+  default = true
+}
+

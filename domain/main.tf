@@ -1,13 +1,14 @@
 locals {
-  name_prefix   = var.context.name_prefix
-  tags          = var.context.tags
-  nlb_name      = format("%s-openapi-nlb", local.name_prefix)
-  vpc_link_name = format("%s-openapi", local.name_prefix)
-  domain_name   = format("%s.%s", var.public_domain_prefix, var.context.domain)
+  name_prefix           = var.context.name_prefix
+  tags                  = var.context.tags
+  nlb_name              = format("%s-openapi-nlb", local.name_prefix)
+  vpc_link_name         = format("%s-openapi", local.name_prefix)
+  domain_name           = format("%s.%s", var.public_domain_prefix, var.context.domain)
+  create_route53_record = var.exists_public_hosting_zone
 }
 
 resource "aws_api_gateway_domain_name" "regional" {
-  count                    = var.endpoint_type == "REGIONAL" ? 1 : 0
+  count                    = local.create_route53_record && var.endpoint_type == "REGIONAL" ? 1 : 0
   regional_certificate_arn = data.aws_acm_certificate.this.arn
   domain_name              = local.domain_name
 
@@ -21,10 +22,10 @@ resource "aws_api_gateway_domain_name" "regional" {
 }
 
 resource "aws_route53_record" "regional" {
-  count   =  var.endpoint_type == "REGIONAL" ? 1 : 0
+  count   = local.create_route53_record && var.endpoint_type == "REGIONAL" ? 1 : 0
   name    = concat(aws_api_gateway_domain_name.regional.*.domain_name, [""])[0]
   type    = "A"
-  zone_id = data.aws_route53_zone.public.zone_id
+  zone_id = concat(data.aws_route53_zone.public.*.zone_id, [""])[0]
 
   alias {
     evaluate_target_health = true
@@ -34,7 +35,7 @@ resource "aws_route53_record" "regional" {
 }
 
 resource "aws_api_gateway_domain_name" "edge" {
-  count           = var.endpoint_type == "EDGE" ? 1 : 0
+  count           = local.create_route53_record && var.endpoint_type == "EDGE" ? 1 : 0
   certificate_arn = data.aws_acm_certificate.this.arn
   domain_name     = local.domain_name
 
@@ -48,10 +49,10 @@ resource "aws_api_gateway_domain_name" "edge" {
 }
 
 resource "aws_route53_record" "edge" {
-  count   = var.endpoint_type == "EDGE" ? 1 : 0
+  count   = local.create_route53_record && var.endpoint_type == "EDGE" ? 1 : 0
   name    = concat(aws_api_gateway_domain_name.edge.*.domain_name, [""])[0]
   type    = "A"
-  zone_id = data.aws_route53_zone.public.zone_id
+  zone_id = concat(data.aws_route53_zone.public.*.zone_id, [""])[0]
 
   alias {
     evaluate_target_health = true
