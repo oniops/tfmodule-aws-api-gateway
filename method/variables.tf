@@ -45,12 +45,6 @@ variable "authorizer_id" {
   #  }
 }
 
-variable "integration_id" {
-  type        = string
-  description = "Integration ID"
-  default     = null
-}
-
 variable "request_parameters" {
   type        = map(bool)
   description = <<EOF
