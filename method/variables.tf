@@ -250,7 +250,7 @@ Ex)
   cache_key_parameters = ["method.request.path.users"]
 EOF
 
-  default = []
+  default = null
 }
 
 # Response
