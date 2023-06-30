@@ -58,7 +58,7 @@ Ex)
       "method.request.header.x-sig-date"  = true
     }
 EOF
-  default     = {}
+  default     = null
 }
 
 variable "authorization_scopes" {
@@ -250,7 +250,7 @@ Ex)
   cache_key_parameters = ["method.request.path.users"]
 EOF
 
-  default = null
+  default = []
 }
 
 # Response
