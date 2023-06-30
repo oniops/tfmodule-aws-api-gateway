@@ -31,6 +31,7 @@ resource "aws_api_gateway_integration" "this" {
   rest_api_id             = var.parent_ids.rest_api_id
   resource_id             = var.parent_ids.resource_id
   http_method             = concat(aws_api_gateway_method.this.*.http_method, [""])[0]
+  id                      = var.integration_id
   integration_http_method = local.integration_http_method
   type                    = var.type
   connection_type         = var.connection_type
