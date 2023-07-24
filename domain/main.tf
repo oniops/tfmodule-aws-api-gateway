@@ -1,9 +1,9 @@
 locals {
   name_prefix           = var.context.name_prefix
   tags                  = var.context.tags
-  nlb_name              = format("%s-openapi-nlb", local.name_prefix)
-  vpc_link_name         = format("%s-openapi", local.name_prefix)
-  domain_name           = format("%s.%s", var.public_domain_prefix, var.context.domain)
+  #nlb_name              = format("%s-openapi-nlb", local.name_prefix)
+  #vpc_link_name         = format("%s-openapi", local.name_prefix)
+  domain_name           = format("%s.%s", var.public_domain_prefix, (var.domain == null ? var.context.domain : var.domain))
   create_route53_record = var.exists_public_hosting_zone
 }
 
