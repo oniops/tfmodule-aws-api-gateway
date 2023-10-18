@@ -26,6 +26,9 @@ resource "aws_api_gateway_method_response" "this" {
   status_code         = local.status_code
   response_models     = var.response_models
   response_parameters = var.response_parameters
+  depends_on = [
+    aws_api_gateway_method.this
+  ]
 }
 
 resource "aws_api_gateway_integration" "this" {
@@ -60,6 +63,7 @@ resource "aws_api_gateway_integration_response" "this" {
   content_handling    = var.content_handling_integration
   response_templates  = var.response_template
   depends_on          = [
+    aws_api_gateway_method_response.this,
     aws_api_gateway_integration.this
   ]
 }
