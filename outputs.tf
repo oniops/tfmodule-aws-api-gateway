@@ -18,5 +18,5 @@ output "ids" {
 }
 
 output "cloudwatch_role_arn" {
-  value = try(aws_api_gateway_account.apigw_account.cloudwatch_role_arn, "")
+  value = try(aws_api_gateway_account.apigw_account[0].cloudwatch_role_arn, "")
 }

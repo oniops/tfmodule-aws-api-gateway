@@ -4,6 +4,12 @@ variable "create_api_gateway" {
   default     = true
 }
 
+variable "create_api_account" {
+  type        = bool
+  description = "If this vIf value is true, creates an API Gateway Account."
+  default     = true
+}
+
 variable "api_name" {
   type        = string
   description = "The name of API Gateway REST-API"
