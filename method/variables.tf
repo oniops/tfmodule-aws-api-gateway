@@ -283,6 +283,13 @@ For example:
   response_parameters = {
     "method.response.header.X-Some-Header" = true
   }
+
+For CORS:
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Headers" = true
+  }
 EOF
 
   default = null
@@ -316,6 +323,14 @@ For example:
   response_parameters_integration = {
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
+
+For CORS:
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'",
+    "method.response.header.Access-Control-Allow-Headers" = "'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token, Authorization'",
+    "method.response.header.Access-Control-Allow-Methods" = "'GET, POST, PUT, DELETE, OPTIONS'"
+  }
+
 EOF
 
   default = null
