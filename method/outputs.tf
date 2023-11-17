@@ -7,7 +7,7 @@ output "resource_id" {
 }
 
 
-output "api_method_id" {
+output "method_id" {
   value = aws_api_gateway_method.this.id
 }
 
@@ -15,6 +15,11 @@ output "http_method" {
   value = aws_api_gateway_method.this.http_method
 }
 
-output "api_integration_id" {
+output "integration_id" {
   value = aws_api_gateway_integration.this.id
 }
+
+output "integration_http_method" {
+  value = aws_api_gateway_integration.this.integration_http_method
+}
+
