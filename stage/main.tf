@@ -28,9 +28,10 @@ resource "aws_api_gateway_stage" "this" {
   cache_cluster_size    = var.cache_cluster_size
 
   dynamic "access_log_settings" {
-    for_each = var.enable_access_logs ? [1] : []
+    for_each = var.enable_access_logs ? [true] : []
 
     content {
+      # ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs.
       destination_arn = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
       format          = replace(var.access_log_format, "\n", "")
     }

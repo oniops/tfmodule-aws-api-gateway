@@ -11,5 +11,5 @@ data "aws_iam_policy_document" "assume_apigw" {
 }
 
 data "aws_iam_policy" "apigw_cw" {
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  name = "AmazonAPIGatewayPushToCloudWatchLogs"
 }

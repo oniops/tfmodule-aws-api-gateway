@@ -1,6 +1,6 @@
 locals {
   role_name   = format("%sAPIGatewayLoggingRole", var.context.project)
-  policy_name = format("%sAPIGatewayLoggingPolicy", var.context.project)
+  # policy_name = format("%sAPIGatewayLoggingPolicy", var.context.project)
 }
 
 resource "aws_iam_role" "apigw" {
@@ -17,6 +17,7 @@ resource "aws_iam_role_policy_attachment" "apigw_logging" {
   policy_arn = data.aws_iam_policy.apigw_cw.arn
 }
 
+/*
 resource "aws_iam_role_policy" "apigw_logging" {
   count = var.create_api_account ? 1 : 0
   name  = local.policy_name
@@ -43,12 +44,12 @@ resource "aws_iam_role_policy" "apigw_logging" {
 }
 EOF
 }
+*/
 
 resource "aws_api_gateway_account" "apigw_account" {
   count               = var.create_api_account ? 1 : 0
   cloudwatch_role_arn = try(aws_iam_role.apigw[0].arn, "")
   depends_on          = [
     aws_iam_role_policy_attachment.apigw_logging,
-    aws_iam_role_policy.apigw_logging
   ]
 }
