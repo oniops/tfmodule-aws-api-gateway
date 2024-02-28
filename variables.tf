@@ -20,3 +20,9 @@ variable "description" {
   description = "The description of API Gateway REST-API"
   default     = null
 }
+
+variable "binary_media_types" {
+  type        = list(string)
+  description = " List of binary media types supported by the REST API. By default, the REST API supports only UTF-8-encoded text payloads. "
+  default     = null
+}
