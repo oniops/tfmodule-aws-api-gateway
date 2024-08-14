@@ -7,7 +7,7 @@ variable "create" {
 variable "create_api_account" {
   type        = bool
   description = "If this vIf value is true, creates an API Gateway Account."
-  default     = true
+  default     = false
 }
 
 variable "api_name" {

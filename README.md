@@ -7,6 +7,104 @@ AWS API Gateway 리소스를 구성 합니다.
 RESTFul 메서드 및 서비스 통합을 위한 API 리소스를 생성 합니다.
 
 ```
+locals {
+  project          = module.ctx.project
+  name_prefix      = module.ctx.name_prefix
+  region           = module.ctx.region
+  tags             = module.ctx.tags
+  openapi_dns_name = data.aws_lb.openapi.dns_name
+  account_id       = data.aws_caller_identity.current.account_id
+  deployed_stage   = local.project
+}
+
+module "ctx" {
+  source  = "git::https://code.bespinglobal.com/scm/op/tfmodule-context.git?ref=v1.0.0"
+  context = {
+    project      = "gstg"
+    region       = "ap-northeast-2"
+    environment  = "Stage"
+    owner        = "aws_opsnow_gstg@opsnow.com"
+    department   = "OpsNow"
+    customer     = "OpsNow Global STG"
+    domain       = "gstg.opsnow.com"
+    pri_domain   = "backend.opsnow.com"
+    s3_prefix_cd = "region"
+  }
+}
+
+# ROOT
+module "api" {
+  source             = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.1.0"
+  context            = module.ctx.context
+  api_name           = var.api_name
+  create_api_account = false
+}
+
+# /{proxy+}
+module "proxy" {
+  source     = "../../resource"
+  parent_ids = module.api.ids
+  path_part  = "{proxy+}"
+}
+
+# /{proxy+}ANY
+module "proxyAny" {
+  source             = "../../method"
+  parent_ids         = module.proxy.ids
+  http_method        = "ANY"
+  type               = "HTTP_PROXY"
+  connection_type    = "VPC_LINK"
+  connection_id      = data.aws_api_gateway_vpc_link.this.id
+  uri                = format("http://%s:9001/platform/v1/{proxy}", local.openapi_dns_name)
+  request_parameters = {
+    "method.request.path.proxy" = true
+  }
+  request_parameters_integration = {
+    "integration.request.path.proxy" = "method.request.path.proxy"
+  }
+  passthrough_behavior = "WHEN_NO_MATCH"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+}
+
+# deploy to stage
+module "stage" {
+  source             = "../../stage"
+  name               = local.deployed_stage
+  api_name           = var.api_name
+  context            = module.ctx.context
+  rest_api_id        = module.api.rest_api_id
+  enable_access_logs = true
+  method_settings    = [
+    {
+      method_path = "*/*"
+      settings    = {
+        logging_level   = "ERROR"
+        metrics_enabled = true
+      }
+    },
+  ]
+  depends_on = [
+    module.api,
+    module.proxyAny,
+    module.billProxyAny,
+    module.identityProxyAny,
+    module.platProxyAny,
+    module.pushPxyAny,
+  ]
+}
+
+resource "aws_apigatewayv2_api_mapping" "this" {
+  api_id          = module.api.rest_api_id
+  domain_name     = data.aws_api_gateway_domain_name.this.domain_name
+  api_mapping_key = var.api_mapping_key
+  stage           = local.deployed_stage
+  depends_on      = [module.stage]
+}
+
+
 ```
 
 ### domain
