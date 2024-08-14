@@ -1,4 +1,4 @@
-variable "create_api_gateway" {
+variable "create" {
   type        = bool
   description = "If this vIf value is true, creates an API Gateway."
   default     = true

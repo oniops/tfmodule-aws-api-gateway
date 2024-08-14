@@ -1,3 +1,8 @@
+variable "create" {
+  type    = bool
+  default = true
+}
+
 variable "name" {
   type        = string
   description = "The name of stage"

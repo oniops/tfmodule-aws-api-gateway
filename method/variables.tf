@@ -1,4 +1,10 @@
 # for aws_api_gateway_method
+variable "create" {
+  type    = bool
+  default = true
+}
+
+# for aws_api_gateway_method
 variable "parent_ids" {
   type = object({
     resource_id = string
@@ -23,7 +29,7 @@ variable "http_method" {
   type        = string
   description = "HTTP Method (GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY)"
   validation {
-    condition     = contains(["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "ANY"], var.http_method)
+    condition = contains(["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "ANY"], var.http_method)
     error_message = "Valid http_method is one of GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY"
   }
 }
@@ -46,7 +52,7 @@ variable "authorizer_id" {
 }
 
 variable "request_parameters" {
-  type        = map(bool)
+  type = map(bool)
   description = <<EOF
 Map of request parameters (from the path, query string and headers) that should be passed to the integration.
 
@@ -62,7 +68,7 @@ EOF
 }
 
 variable "authorization_scopes" {
-  type        = list(string)
+  type = list(string)
   description = <<EOF
 Authorization scopes used when the authorization is `COGNITO_USER_POOLS`.
 
@@ -86,7 +92,7 @@ variable "operation_name" {
 }
 
 variable "request_models" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 Map of the API models used for the request's content type where key is the content type (built-in model are Error and Empty.
 
@@ -123,7 +129,7 @@ Valid values
 EOF
 
   validation {
-    condition     = contains(["HTTP", "HTTP_PROXY", "AWS", "AWS_PROXY", "MOCK"], var.type)
+    condition = contains(["HTTP", "HTTP_PROXY", "AWS", "AWS_PROXY", "MOCK"], var.type)
     error_message = "Valid api-gateway integration type is one of HTTP, HTTP_PROXY, AWS, AWS_PROXY or MOCK."
   }
 }
@@ -147,7 +153,7 @@ variable "timeout_milliseconds" {
 }
 
 variable "request_parameters_integration" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 Map of request query string parameters and headers that should be passed to the backend responder.
 
@@ -203,7 +209,7 @@ variable "content_handling" {
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition     = var.content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling))
+    condition = var.content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling))
     #  var.content_handling == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling+"")
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
@@ -226,7 +232,7 @@ variable "passthrough_behavior" {
   description = "Integration passthrough behavior (WHEN_NO_MATCH, WHEN_NO_TEMPLATES, NEVER). Required if request_templates is used."
   default     = "WHEN_NO_MATCH"
   validation {
-    condition     = contains(["WHEN_NO_MATCH", "WHEN_NO_TEMPLATES", "NEVER"], var.passthrough_behavior)
+    condition = contains(["WHEN_NO_MATCH", "WHEN_NO_TEMPLATES", "NEVER"], var.passthrough_behavior)
     error_message = "Valid passthrough_behavior is one of WHEN_NO_MATCH, WHEN_NO_TEMPLATES or NEVER."
   }
 }
@@ -238,7 +244,7 @@ variable "cache_namespace" {
 }
 
 variable "cache_key_parameters" {
-  type        = list(string)
+  type = list(string)
   description = <<EOF
 List of cache key parameters for the integration. Support only for GET method, TTL value between 300 and 3600 seconds, Default is 300.
 see - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html
@@ -261,7 +267,7 @@ variable "status_code" {
 }
 
 variable "response_models" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 A map of the API models used for the response's content type
 
@@ -275,7 +281,7 @@ EOF
 }
 
 variable "response_parameters" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
 
@@ -296,7 +302,7 @@ EOF
 }
 
 variable "response_template" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
 
@@ -315,7 +321,7 @@ EOF
 }
 
 variable "response_parameters_integration" {
-  type        = map(string)
+  type = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
 
@@ -357,7 +363,7 @@ variable "content_handling_integration" {
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition     = var.content_handling_integration == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
+    condition = var.content_handling_integration == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
     #  var.content_handling_integration == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling_integration+"")
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }

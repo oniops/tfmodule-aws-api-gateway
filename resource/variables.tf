@@ -1,3 +1,9 @@
+# for aws_api_gateway_method
+variable "create" {
+  type    = bool
+  default = true
+}
+
 # for aws_api_gateway_resource
 variable "parent_ids" {
   type = object({

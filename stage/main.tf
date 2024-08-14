@@ -1,6 +1,7 @@
 locals {
+  create = var.create
   cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix, var.api_name == null ? var.name : var.api_name)
-  tags                      = var.context.tags
+  tags   = var.context.tags
 }
 
 resource "aws_api_gateway_deployment" "this" {
@@ -8,7 +9,7 @@ resource "aws_api_gateway_deployment" "this" {
   stage_description = var.description
   rest_api_id       = var.rest_api_id
 
-  triggers          = {
+  triggers = {
     redeployment = sha1(var.redeployment)
   }
 
@@ -18,6 +19,7 @@ resource "aws_api_gateway_deployment" "this" {
 }
 
 resource "aws_api_gateway_stage" "this" {
+  count                 = local.create ? 1 : 0
   stage_name            = var.name
   description           = var.description
   rest_api_id           = var.rest_api_id
@@ -33,7 +35,7 @@ resource "aws_api_gateway_stage" "this" {
     content {
       # ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs.
       destination_arn = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
-      format          = replace(var.access_log_format, "\n", "")
+      format = replace(var.access_log_format, "\n", "")
     }
   }
 
@@ -58,7 +60,7 @@ resource "aws_api_gateway_stage" "this" {
 }
 
 locals {
-  method_settings_count = var.enable_access_logs ? length(var.method_settings) : 0
+  method_settings_count = local.create && var.enable_access_logs ? length(var.method_settings) : 0
 }
 
 resource "aws_api_gateway_method_settings" "this" {

@@ -8,7 +8,6 @@ variable "context" {
     env_alias    = string # Runtime Environment such as develop, stage, production
     owner        = string # project owner
     team         = string # Team name of Devops Transformation
-    cost_center  = number # Cost Center
     name_prefix  = string # resource name prefix
     pri_domain   = string # private domain name (ex, tools.customer.co.kr)
     tags         = map(string)

@@ -14,9 +14,9 @@ output "ids" {
 }
 
 output "path" {
-  value = aws_api_gateway_resource.this.path
+  value = try(aws_api_gateway_resource.this[0].path, "")
 }
 
 output "path_part" {
-  value = aws_api_gateway_resource.this.path_part
+  value = try(aws_api_gateway_resource.this[0].path_part, "")
 }
