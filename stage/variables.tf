@@ -19,6 +19,18 @@ variable "description" {
   default     = null
 }
 
+variable "stage_description" {
+  type        = string
+  description = "The stage description of stage"
+  default     = null
+}
+
+variable "deployment_description" {
+  type        = string
+  description = "The deployment description of stage"
+  default     = null
+}
+
 variable "documentation_version" {
   type        = string
   description = "The version of API Specification. aws_api_gateway_documentation_version.<resource_id>.version"

@@ -6,7 +6,8 @@ locals {
 
 resource "aws_api_gateway_deployment" "this" {
   stage_name        = var.deployment_stage_name
-  stage_description = var.description
+  description       = var.deployment_description
+  stage_description = var.stage_description
   rest_api_id       = var.rest_api_id
 
   triggers = {
