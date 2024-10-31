@@ -28,7 +28,6 @@ resource "aws_api_gateway_stage" "this" {
   xray_tracing_enabled  = var.xray_tracing_enabled
   cache_cluster_enabled = var.cache_cluster_enabled
   cache_cluster_size    = var.cache_cluster_size
-  web_acl_arn           = var.web_acl_arn
 
   dynamic "access_log_settings" {
     for_each = var.enable_access_logs ? [true] : []
@@ -85,4 +84,10 @@ resource "aws_api_gateway_method_settings" "this" {
   depends_on = [
     aws_api_gateway_stage.this
   ]
+}
+
+resource "aws_wafv2_web_acl_association" "waf" {
+  count        = local.create && var.web_acl_arn != null ? 1 : 0
+  web_acl_arn  = var.web_acl_arn
+  resource_arn = aws_api_gateway_stage.this[0].arn
 }

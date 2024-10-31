@@ -179,7 +179,7 @@ variable "settings" {
 variable "web_acl_arn" {
   description = "ARN of the WebAcl(WAF-v2) associated with the Stage."
   type        = string
-  default     = ""
+  default     = null
 }
 
 variable "deployment_stage_name" {
