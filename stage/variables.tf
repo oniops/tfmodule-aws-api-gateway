@@ -130,6 +130,12 @@ variable "canary_variables" {
   default     = {}
 }
 
+variable "deployment_id" {
+  description = "ID of the deployment that the canary points to."
+  type        = string
+  default     = null
+}
+
 
 #variable "resource_id" {
 #  type        = string
