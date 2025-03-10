@@ -1,7 +1,6 @@
 locals {
   create = var.create
-  cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix, var.api_name == null ? var.name :
-    var.api_name)
+  cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix, var.api_name == null ? var.name : var.api_name)
   tags   = var.context.tags
 }
 
