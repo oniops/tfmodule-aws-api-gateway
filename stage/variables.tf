@@ -19,12 +19,6 @@ variable "description" {
   default     = null
 }
 
-variable "stage_description" {
-  type        = string
-  description = "The stage description of stage"
-  default     = null
-}
-
 variable "deployment_description" {
   type        = string
   description = "The deployment description of stage"
@@ -198,10 +192,4 @@ variable "web_acl_arn" {
   description = "ARN of the WebAcl(WAF-v2) associated with the Stage."
   type        = string
   default     = null
-}
-
-variable "deployment_stage_name" {
-  description = "The name of deployment stage"
-  type        = string
-  default     = ""
 }
