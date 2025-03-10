@@ -1,7 +1,11 @@
 locals {
   create = var.create
-  cloudwatch_log_group_name = format("/apigateway/%s-%s-api", var.context.name_prefix, var.api_name == null ? var.name : var.api_name)
   tags   = var.context.tags
+
+  // @formatter:off
+  cloudwatch_log_group_name = "/apigateway/${var.context.name_prefix}-${(var.api_name == null ? var.name : var.api_name)}-api"
+  // @formatter:on
+
 }
 
 resource "aws_api_gateway_deployment" "this" {

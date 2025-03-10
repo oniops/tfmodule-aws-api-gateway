@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "assume_apigw" {
     effect = "Allow"
     principals {
       identifiers = ["apigateway.amazonaws.com"]
-      type        = "Service"
+      type = "Service"
     }
     actions = ["sts:AssumeRole"]
   }

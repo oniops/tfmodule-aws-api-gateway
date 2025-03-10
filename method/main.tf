@@ -1,8 +1,11 @@
 locals {
-  create                  = var.create
-  option_method           = var.type == "MOCK" && var.http_method == "OPTIONS" ? true : false
+  create = var.create
+
+  // @formatter:off
   integration_http_method = var.http_method_integration != null ? var.http_method_integration : local.option_method ? null : var.http_method
   create_response         = local.create && (var.status_code == null || var.response_models != null || var.response_parameters != null) ? true : false
+  // @formatter:on
+  option_method           = var.type == "MOCK" && var.http_method == "OPTIONS" ? true : false
   status_code             = local.create && local.create_response && var.status_code == null ? "200" : var.status_code
 }
 

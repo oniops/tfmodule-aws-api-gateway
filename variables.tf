@@ -1,12 +1,12 @@
 variable "create" {
   type        = bool
-  description = "If this vIf value is true, creates an API Gateway."
+  description = "If value is true, creates an API Gateway."
   default     = true
 }
 
 variable "create_api_account" {
   type        = bool
-  description = "If this vIf value is true, creates an API Gateway Account."
+  description = "If value is true, creates an API Gateway Account."
   default     = false
 }
 
@@ -22,7 +22,7 @@ variable "description" {
 }
 
 variable "binary_media_types" {
-  type        = list(string)
-  description = " List of binary media types supported by the REST API. By default, the REST API supports only UTF-8-encoded text payloads. "
+  type = list(string)
+  description = "List of binary media types supported by the REST API. By default, the REST API supports only UTF-8-encoded text payloads. "
   default     = null
 }

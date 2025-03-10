@@ -1,6 +1,6 @@
 locals {
-  api_gw_name = format("%s-%s-api", var.context.name_prefix, var.api_name)
-  description = var.description == null ? format("%s RestAPI Gateway", local.api_gw_name) : var.description
+  api_gw_name = "${var.context.name_prefix}-${var.api_name}-api"
+  description = var.description == null ? "${local.api_gw_name} RestAPI Gateway" : var.description
 }
 
 resource "aws_api_gateway_rest_api" "this" {
@@ -10,7 +10,7 @@ resource "aws_api_gateway_rest_api" "this" {
   description        = local.description
   binary_media_types = var.binary_media_types
 
-  tags = merge( var.context.tags, {
+  tags = merge(var.context.tags, {
     Name = local.api_gw_name
   })
 

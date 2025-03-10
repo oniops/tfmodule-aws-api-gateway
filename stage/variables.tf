@@ -126,8 +126,8 @@ variable "use_stage_cache" {
 
 variable "canary_variables" {
   description = "(Optional) Map of overridden stage variables (including new variables) for the canary deployment."
-  type        = map(string)
-  default     = {}
+  type = map(string)
+  default = {}
 }
 
 variable "deployment_id" {
@@ -146,7 +146,7 @@ variable "deployment_id" {
 variable "method_settings" {
   type = list(object({
     method_path = string
-    settings    = map(any)
+    settings = map(any)
   }))
   description = <<EOF
 
@@ -172,12 +172,12 @@ Ex)
   # logging_level is one of OFF, ERROR, INFO
   # unauthorized_cache_control_header_strategy is one of FAIL_WITH_403, SUCCEED_WITH_RESPONSE_HEADER, SUCCEED_WITHOUT_RESPONSE_HEADER
 EOF
-  default     = []
+  default = []
 }
 
 variable "settings" {
   description = "http method settings for api"
-  type        = set(object(
+  type = set(object(
     {
       cache_data_encrypted                       = bool
       cache_ttl_in_seconds                       = number
