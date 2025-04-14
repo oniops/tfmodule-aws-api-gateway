@@ -43,12 +43,18 @@ variable "authorization" {
 
 variable "authorizer_id" {
   type        = string
-  description = "Authorizer id to be used when the authorization is CUSTOM or COGNITO_USER_POOLS"
-  default     = null
+  default     = ""
   #  validation {
   #    condition     = contains(["CUSTOM", "COGNITO_USER_POOLS"], var.authorization) && var.authorizer_id == null
   #    error_message = "Require setting the authorizer_id when the authorization is CUSTOM or COGNITO_USER_POOLS"
   #  }
+  description = <<EOF
+Authorizer id to be used when the authorization is CUSTOM or COGNITO_USER_POOLS
+
+Ex)
+  authorizer_id = aws_api_gateway_authorizer.this.id
+EOF
+
 }
 
 variable "request_parameters" {
@@ -301,26 +307,26 @@ EOF
   default = null
 }
 
-variable "response_template" {
+variable "response_templates" {
   type = map(string)
-  description = <<EOF
+  description = <<-EOF
 A map of response parameters that can be sent to the caller.
 
 For example:
-  response_template = {
-      "application/xml" = <<E-O-F
+  response_templates = {
+      "application/xml" = <<-EOT
   #set($inputRoot = $input.path('$'))
   <?xml version="1.0" encoding="UTF-8"?>
   <message>
       $inputRoot.body
   </message>
-  E-O-F
-EOF
+  EOT
 
+EOF
   default = null
 }
 
-variable "response_parameters_integration" {
+variable "integration_response_parameters" {
   type = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
@@ -358,12 +364,12 @@ EOF
   default = null
 }
 
-variable "content_handling_integration" {
+variable "integration_content_handling" {
   type        = string
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition = var.content_handling_integration == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
+    condition = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
     #  var.content_handling_integration == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling_integration+"")
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
