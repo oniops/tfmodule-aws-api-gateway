@@ -369,8 +369,7 @@ variable "integration_content_handling" {
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling_integration))
-    #  var.content_handling_integration == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling_integration+"")
+    condition = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.integration_content_handling))
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }
