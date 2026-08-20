@@ -2,9 +2,9 @@
 locals {
   create = var.create
 
-  create_response         = local.create && (var.status_code == null || var.response_models != null || var.response_parameters != null) ? true : false
-  option_method           = var.type == "MOCK" && var.http_method == "OPTIONS" ? true : false
-  status_code             = local.create && local.create_response && var.status_code == null ? "200" : var.status_code
+  create_response = local.create && (var.status_code == null || var.response_models != null || var.response_parameters != null) ? true : false
+  option_method   = var.type == "MOCK" && var.http_method == "OPTIONS" ? true : false
+  status_code     = local.create && local.create_response && var.status_code == null ? "200" : var.status_code
 }
 // @formatter:on
 
@@ -14,6 +14,7 @@ resource "aws_api_gateway_method" "this" {
   resource_id          = var.parent_ids.resource_id
   http_method          = var.http_method
   authorization        = var.authorization
+  authorizer_id        = var.authorizer_id == "" ? null : var.authorizer_id
   request_parameters   = var.request_parameters
   request_models       = var.request_models
   authorization_scopes = var.authorization_scopes

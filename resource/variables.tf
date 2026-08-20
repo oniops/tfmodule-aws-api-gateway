@@ -1,7 +1,8 @@
-# for aws_api_gateway_method
+# for aws_api_gateway_resource
 variable "create" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "If true, creates the API Gateway resource."
+  default     = true
 }
 
 # for aws_api_gateway_resource
@@ -10,22 +11,22 @@ variable "parent_ids" {
     resource_id = string
     rest_api_id = string
   })
-  description = "The Resource ID and API Instance ID of the REST API"
+  description = "IDs of the parent - 'rest_api_id' of the REST API and 'resource_id' of the parent resource. Pass the 'ids' output of the root module (for a top-level path) or of an upper resource module to chain the path hierarchy."
 }
 
 variable "rest_api_id" {
   type        = string
-  description = "The Resource Instance ID of the REST API"
+  description = "Deprecated: not referenced by this module. Use parent_ids.rest_api_id instead."
   default     = null
 }
 
 variable "resource_id" {
   type        = string
-  description = "The Resource ID of the REST API"
+  description = "Deprecated: not referenced by this module. Use parent_ids.resource_id instead."
   default     = null
 }
 
 variable "path_part" {
   type        = string
-  description = "Last path segment of this API resource. (v1, users). Define proxy path like `{proxy+}`"
+  description = "Last path segment of this API resource (e.g., 'v1', 'users'). Use greedy path syntax like '{proxy+}' to define a proxy resource."
 }

@@ -1,11 +1,14 @@
 output "cloudwatch_log_group_name" {
-  value = try(aws_cloudwatch_log_group.this.*.name, "")
+  description = "The name of the CloudWatch log group for stage access logs. Returns an empty value when enable_access_logs is false."
+  value       = try(aws_cloudwatch_log_group.this.*.name, "")
 }
 
 output "cloudwatch_log_group_arn" {
-  value = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
+  description = "The ARN of the CloudWatch log group for stage access logs. Returns an empty string when enable_access_logs is false."
+  value       = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
 }
 
 output "name" {
-  value = var.name
+  description = "The name of the deployed stage."
+  value       = var.name
 }
