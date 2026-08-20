@@ -1,6 +1,6 @@
 locals {
   api_gw_name = "${var.context.name_prefix}-${var.api_name}-api"
-  description = var.description == null ? "${local.api_gw_name} RestAPI Gateway" : var.description
+  description = coalesce(var.description, "${local.api_gw_name} RestAPI Gateway")
 }
 
 resource "aws_api_gateway_rest_api" "this" {
@@ -10,11 +10,15 @@ resource "aws_api_gateway_rest_api" "this" {
   description        = local.description
   binary_media_types = var.binary_media_types
 
+  dynamic "endpoint_configuration" {
+    for_each = var.endpoint_type == null ? [] : [var.endpoint_type]
+
+    content {
+      types = [endpoint_configuration.value]
+    }
+  }
+
   tags = merge(var.context.tags, {
     Name = local.api_gw_name
   })
-
-  #    endpoint_configuration {
-  #      types = [var.endpoint_type]
-  #    }
 }

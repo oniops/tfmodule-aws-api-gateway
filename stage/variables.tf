@@ -5,7 +5,7 @@ variable "context" {
 
 variable "create" {
   type        = bool
-  description = "If true, creates the stage, method settings, log group, and WAF association. Note that the deployment (aws_api_gateway_deployment) is always created."
+  description = "If true, creates the deployment, stage, method settings, log group, and WAF association."
   default     = true
 }
 
@@ -78,7 +78,7 @@ EOF
 
 variable "enable_access_logs" {
   type        = bool
-  description = "If true, creates a CloudWatch log group and enables access logging on the stage. Also required for method_settings to be applied."
+  description = "If true, creates a CloudWatch log group and enables access logging on the stage."
   default     = false
 }
 
@@ -88,24 +88,11 @@ variable "access_log_format" {
   default     = "{\"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\"}"
 }
 
-variable "access_log_level" {
-  type        = string
-  description = "Access logging level, one of OFF, INFO or ERROR. Currently not referenced by this module; use the 'logging_level' key inside method_settings instead."
-  default     = "OFF"
-}
-
 variable "retention_in_days" {
   description = "Retention period (in days) of the access-log CloudWatch log group."
   type        = number
   default     = 90
 }
-
-variable "logging_level" {
-  type        = string
-  description = "CloudWatch logging level for the stage, one of OFF, ERROR or INFO. Currently not referenced by this module; use the 'logging_level' key inside method_settings instead."
-  default     = "OFF"
-}
-
 
 variable "canary_deployment" {
   description = "Flag to decide whether canary deployment exist."
@@ -138,12 +125,6 @@ variable "deployment_id" {
 }
 
 
-#variable "resource_id" {
-#  type        = string
-#  description = "API resource ID"
-#}
-#
-
 variable "method_settings" {
   type = list(object({
     method_path = string
@@ -151,7 +132,8 @@ variable "method_settings" {
   }))
   description = <<EOF
 List of method settings applied to the stage (aws_api_gateway_method_settings). Each entry consists of a
-'method_path' (e.g., "*/*" for all methods) and a 'settings' map. Applied only when enable_access_logs is true.
+'method_path' (e.g., "*/*" for all methods) and a 'settings' map. Note that logging_level and metrics require
+the account-level CloudWatch role to be configured (see 'create_api_account' of the root module).
 
 Ex)
   method_settings    = [
@@ -176,25 +158,6 @@ Ex)
   # unauthorized_cache_control_header_strategy is one of FAIL_WITH_403, SUCCEED_WITH_RESPONSE_HEADER, SUCCEED_WITHOUT_RESPONSE_HEADER
 EOF
   default     = []
-}
-
-variable "settings" {
-  description = "HTTP method settings for the API. Currently not referenced by this module; use method_settings instead."
-  type = set(object(
-    {
-      cache_data_encrypted                       = bool
-      cache_ttl_in_seconds                       = number
-      caching_enabled                            = bool
-      data_trace_enabled                         = bool
-      logging_level                              = string
-      metrics_enabled                            = bool
-      require_authorization_for_cache_control    = bool
-      throttling_burst_limit                     = number
-      throttling_rate_limit                      = number
-      unauthorized_cache_control_header_strategy = string
-    }
-  ))
-  default = []
 }
 
 variable "web_acl_arn" {

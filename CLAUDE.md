@@ -55,7 +55,7 @@ CI/CD 및 도구 체인은 다음과 같다.
 | 문법 검증 | `terraform init -backend=false && terraform validate` | 재사용 모듈이므로 저장소 단독으로는 validate까지만 가능 |
 | 빌드(plan) | `terraform plan` | 저장소 루트에서 직접 실행 불가 — `api_name`, `context` 등 필수 입력이 없다. 이 모듈을 소비하는 프로젝트에서 실행한다 |
 | 테스트 | `terraform test` | 테스트 파일(`*.tftest.hcl`)이 없어 현재 실행 대상 없음 |
-| 정적 분석 | `terraform fmt -check -recursive` | 2026-08-20 기준 기존 파일 10개가 fmt 미준수로 실패한다. 작업 중 수정한 파일에만 `terraform fmt <파일>`을 적용하고, 저장소 전체 일괄 포맷팅은 하지 않는다 |
+| 정적 분석 | `terraform fmt -check -recursive` | 2026-08-20 리팩토링 이후 저장소 전체가 fmt 준수 상태다. 커밋 전 반드시 통과시킨다 |
 
 로컬 Terraform 버전은 v1.5.7이며 `versions.tf`의 `required_version >= 1.5.7`, AWS provider `>= 6.0.0`을 요구한다.
 
@@ -69,7 +69,7 @@ CI/CD 및 도구 체인은 다음과 같다.
 저장소에서 실제 사용 중인 고유 패턴은 다음과 같다.
 
 - 조건부 생성: 모든 리소스는 `count = var.create ? 1 : 0`(또는 파생 local) 패턴으로 생성 여부를 제어한다. 새 리소스도 같은 패턴을 따른다.
-- 출력 안전 참조: count 기반 리소스의 속성은 `concat(resource.*.attr, [""])[0]`, `one(...)`, `try(..., "")` 패턴으로 빈 값 폴백을 두고 참조한다.
+- 출력 안전 참조: count 기반 리소스의 속성은 output에서 `try(resource[0].attr, "")` 패턴으로 빈 값 폴백을 두고 참조한다. 같은 생성 조건을 공유하는 리소스 간에는 `resource[0].attr` 직접 참조를 사용한다 (legacy `concat(splat)[0]`, `one()` 패턴은 사용하지 않는다).
 - 네이밍: 리소스 이름은 `var.context.name_prefix` 기반으로 조합한다 (예: `"${var.context.name_prefix}-${var.api_name}-api"`, 로그 그룹 `/apigateway/<name_prefix>-<api_name>-api`).
 - 태깅: 모든 태그 지원 리소스는 `merge(var.context.tags, { Name = ... })`로 태그를 부여한다.
 - 모듈 체이닝: 서브모듈은 `parent_ids = { rest_api_id, resource_id }` 객체를 입력으로 받는다. 인터페이스를 바꿀 때는 README 예시와 소비 프로젝트 호환성을 함께 고려한다.

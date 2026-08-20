@@ -1,14 +1,11 @@
 locals {
-  create = var.create
-  tags   = var.context.tags
-
-  // @formatter:off
-  cloudwatch_log_group_name = "/apigateway/${var.context.name_prefix}-${(var.api_name == null ? var.name : var.api_name)}-api"
-  // @formatter:on
-
+  create                    = var.create
+  tags                      = var.context.tags
+  cloudwatch_log_group_name = "/apigateway/${var.context.name_prefix}-${coalesce(var.api_name, var.name)}-api"
 }
 
 resource "aws_api_gateway_deployment" "this" {
+  count       = local.create ? 1 : 0
   description = var.deployment_description
   rest_api_id = var.rest_api_id
 
@@ -26,7 +23,7 @@ resource "aws_api_gateway_stage" "this" {
   stage_name            = var.name
   description           = var.description
   rest_api_id           = var.rest_api_id
-  deployment_id         = aws_api_gateway_deployment.this.id
+  deployment_id         = aws_api_gateway_deployment.this[0].id
   documentation_version = var.documentation_version
   xray_tracing_enabled  = var.xray_tracing_enabled
   cache_cluster_enabled = var.cache_cluster_enabled
@@ -37,8 +34,8 @@ resource "aws_api_gateway_stage" "this" {
 
     content {
       # ARN of the CloudWatch Logs log group or Kinesis Data Firehose delivery stream to receive access logs.
-      destination_arn = concat(aws_cloudwatch_log_group.this.*.arn, [""])[0]
-      format = replace(var.access_log_format, "\n", "")
+      destination_arn = aws_cloudwatch_log_group.this[0].arn
+      format          = replace(var.access_log_format, "\n", "")
     }
   }
 
@@ -58,36 +55,28 @@ resource "aws_api_gateway_stage" "this" {
   )
 
   depends_on = [
-    aws_api_gateway_deployment.this,
     aws_cloudwatch_log_group.this
   ]
 }
 
-locals {
-  method_settings_count = local.create && var.enable_access_logs ? length(var.method_settings) : 0
-}
-
 resource "aws_api_gateway_method_settings" "this" {
-  count = local.method_settings_count
+  count = local.create ? length(var.method_settings) : 0
 
   method_path = var.method_settings[count.index]["method_path"]
   rest_api_id = var.rest_api_id
-  stage_name  = var.name
+  stage_name  = aws_api_gateway_stage.this[0].stage_name
 
   settings {
-    logging_level = lookup(var.method_settings[count.index]["settings"], "logging_level", "INFO")
-    metrics_enabled = lookup(var.method_settings[count.index]["settings"], "metrics_enabled", false)
-    data_trace_enabled = lookup(var.method_settings[count.index]["settings"], "data_trace_enabled", false)
-    caching_enabled = lookup(var.method_settings[count.index]["settings"], "caching_enabled", false)
-    cache_data_encrypted = lookup(var.method_settings[count.index]["settings"], "cache_data_encrypted", false)
-    cache_ttl_in_seconds = lookup(var.method_settings[count.index]["settings"], "cache_ttl_in_seconds", null)
-    throttling_burst_limit = lookup(var.method_settings[count.index]["settings"], "throttling_burst_limit", -1)
-    throttling_rate_limit = lookup(var.method_settings[count.index]["settings"], "throttling_rate_limit", -1)
+    logging_level                              = lookup(var.method_settings[count.index]["settings"], "logging_level", "INFO")
+    metrics_enabled                            = lookup(var.method_settings[count.index]["settings"], "metrics_enabled", false)
+    data_trace_enabled                         = lookup(var.method_settings[count.index]["settings"], "data_trace_enabled", false)
+    caching_enabled                            = lookup(var.method_settings[count.index]["settings"], "caching_enabled", false)
+    cache_data_encrypted                       = lookup(var.method_settings[count.index]["settings"], "cache_data_encrypted", false)
+    cache_ttl_in_seconds                       = lookup(var.method_settings[count.index]["settings"], "cache_ttl_in_seconds", null)
+    throttling_burst_limit                     = lookup(var.method_settings[count.index]["settings"], "throttling_burst_limit", -1)
+    throttling_rate_limit                      = lookup(var.method_settings[count.index]["settings"], "throttling_rate_limit", -1)
     unauthorized_cache_control_header_strategy = lookup(var.method_settings[count.index]["settings"], "unauthorized_cache_control_header_strategy", null)
   }
-  depends_on = [
-    aws_api_gateway_stage.this
-  ]
 }
 
 resource "aws_wafv2_web_acl_association" "waf" {

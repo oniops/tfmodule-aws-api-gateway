@@ -14,18 +14,6 @@ variable "parent_ids" {
   description = "IDs of the parent - 'rest_api_id' of the REST API and 'resource_id' of the API resource to attach the method to. Pass the 'ids' output of the root module or of a resource module."
 }
 
-#variable "rest_api_id" {
-#  type        = string
-#  description = "The Resource Instance ID of the REST API"
-#  default     = null
-#}
-#
-#variable "resource_id" {
-#  type        = string
-#  description = "The Resource ID of the REST API"
-#  default     = null
-#}
-
 variable "http_method" {
   type        = string
   description = "HTTP Method (GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY)"
@@ -39,16 +27,15 @@ variable "authorization" {
   type        = string
   description = "Type of authorization used for the method (NONE, CUSTOM, AWS_IAM, COGNITO_USER_POOLS)"
   default     = "NONE"
+  validation {
+    condition     = contains(["NONE", "CUSTOM", "AWS_IAM", "COGNITO_USER_POOLS"], var.authorization)
+    error_message = "Valid authorization is one of NONE, CUSTOM, AWS_IAM or COGNITO_USER_POOLS."
+  }
 }
 
-
 variable "authorizer_id" {
-  type    = string
-  default = ""
-  #  validation {
-  #    condition     = contains(["CUSTOM", "COGNITO_USER_POOLS"], var.authorization) && var.authorizer_id == null
-  #    error_message = "Require setting the authorizer_id when the authorization is CUSTOM or COGNITO_USER_POOLS"
-  #  }
+  type        = string
+  default     = ""
   description = <<EOF
 Authorizer id to be used when the authorization is CUSTOM or COGNITO_USER_POOLS.
 An empty string is treated as unset (null).
@@ -146,6 +133,10 @@ variable "connection_type" {
   type        = string
   description = "Integration input's connectionType. Valid connection_type is INTERNET or VPC_LINK"
   default     = null
+  validation {
+    condition     = contains(["INTERNET", "VPC_LINK"], coalesce(var.connection_type, "INTERNET"))
+    error_message = "Valid connection_type is one of INTERNET or VPC_LINK."
+  }
 }
 
 variable "connection_id" {
@@ -217,8 +208,7 @@ variable "content_handling" {
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition = var.content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling))
-    #  var.content_handling == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling+"")
+    condition     = contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], coalesce(var.content_handling, "CONVERT_TO_TEXT"))
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }
@@ -371,7 +361,7 @@ variable "integration_content_handling" {
   description = "How to handle response payload content type conversions on the integration response. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, the response payload will pass through."
   default     = null
   validation {
-    condition     = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.integration_content_handling))
-    error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
+    condition     = contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], coalesce(var.integration_content_handling, "CONVERT_TO_TEXT"))
+    error_message = "Valid integration_content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }

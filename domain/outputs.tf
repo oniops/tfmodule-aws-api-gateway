@@ -5,5 +5,5 @@ output "domain_name" {
 
 output "gateway_domain_name" {
   description = "The AWS-side target domain name of the API Gateway custom domain, used as the DNS alias target. Returns the regional domain name for REGIONAL and the CloudFront domain name for EDGE. Returns an empty string if the domain is not created."
-  value       = var.endpoint_type == "REGIONAL" ? concat(aws_api_gateway_domain_name.regional.*.regional_domain_name, [""])[0] : concat(aws_api_gateway_domain_name.edge.*.cloudfront_domain_name, [""])[0]
+  value       = var.endpoint_type == "REGIONAL" ? try(aws_api_gateway_domain_name.regional[0].regional_domain_name, "") : try(aws_api_gateway_domain_name.edge[0].cloudfront_domain_name, "")
 }

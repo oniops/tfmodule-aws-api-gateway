@@ -5,19 +5,19 @@ output "api_gw_name" {
 
 output "resource_id" {
   description = "The resource ID of the REST API's root resource ('/'). Returns an empty string if the REST API is not created."
-  value       = concat(aws_api_gateway_rest_api.this.*.root_resource_id, [""])[0]
+  value       = try(aws_api_gateway_rest_api.this[0].root_resource_id, "")
 }
 
 output "rest_api_id" {
   description = "The ID of the REST API. Returns an empty string if the REST API is not created."
-  value       = concat(aws_api_gateway_rest_api.this.*.id, [""])[0]
+  value       = try(aws_api_gateway_rest_api.this[0].id, "")
 }
 
 output "ids" {
   description = "Object containing rest_api_id and the root resource_id. Pass this as 'parent_ids' to the resource and method submodules to chain the API hierarchy."
   value = {
-    resource_id = concat(aws_api_gateway_rest_api.this.*.root_resource_id, [""])[0]
-    rest_api_id = concat(aws_api_gateway_rest_api.this.*.id, [""])[0]
+    resource_id = try(aws_api_gateway_rest_api.this[0].root_resource_id, "")
+    rest_api_id = try(aws_api_gateway_rest_api.this[0].id, "")
   }
 }
 

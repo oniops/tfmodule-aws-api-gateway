@@ -21,6 +21,16 @@ variable "description" {
   default     = null
 }
 
+variable "endpoint_type" {
+  type        = string
+  description = "Endpoint type of the REST API, one of EDGE, REGIONAL or PRIVATE. If not set, the endpoint_configuration block is omitted and AWS defaults to EDGE."
+  default     = null
+  validation {
+    condition     = contains(["EDGE", "REGIONAL", "PRIVATE"], coalesce(var.endpoint_type, "EDGE"))
+    error_message = "Valid endpoint_type is one of EDGE, REGIONAL or PRIVATE."
+  }
+}
+
 variable "binary_media_types" {
   type        = list(string)
   description = "List of binary media types (MIME types) supported by the REST API, such as 'application/octet-stream' or 'image/png'. By default, the REST API supports only UTF-8-encoded text payloads."

@@ -225,7 +225,8 @@ module "usersOptions" {
 API Gateway 리소스를 Stage 런타임 환경으로 배포 합니다. 
 
 - `redeployment` 값의 SHA1 해시가 변경될 때마다 재배포가 트리거 됩니다. API 를 정의한 파일 내용을 `jsonencode` 로 전달하면 파일 변경 시 자동 재배포 됩니다.
-- `enable_access_logs = true` 인 경우 CloudWatch 로그 그룹(`/apigateway/<name_prefix>-<api_name>-api`)을 생성하고 액세스 로그를 활성화 합니다. `method_settings` 도 이 옵션이 활성화된 경우에만 적용 됩니다.
+- `enable_access_logs = true` 인 경우 CloudWatch 로그 그룹(`/apigateway/{name_prefix}-{api_name}-api`)을 생성하고 액세스 로그를 활성화 합니다.
+- `method_settings` 는 스테이지 생성 시 항상 적용 됩니다. 단, `logging_level`·`metrics_enabled` 는 계정 수준 CloudWatch 역할(루트 모듈 `create_api_account`)이 구성되어 있어야 동작 합니다.
 - `web_acl_arn` 을 지정하면 WAF(v2) Web ACL 을 스테이지에 연결 합니다.
 
 ```hcl
@@ -295,6 +296,7 @@ No modules.
 | <a name="input_create"></a> [create](#input\_create) | If true, creates the API Gateway REST API. Set to false to skip resource creation while keeping the module wired in. | `bool` | `true` | no |
 | <a name="input_create_api_account"></a> [create\_api\_account](#input\_create\_api\_account) | If true, creates an IAM role for pushing logs to CloudWatch and registers it on the account-level API Gateway settings (aws\_api\_gateway\_account). This setting is global per AWS account and region, so enable it in only one module instance. | `bool` | `false` | no |
 | <a name="input_description"></a> [description](#input\_description) | The description of the API Gateway REST API. If not set, defaults to '{full API name} RestAPI Gateway'. | `string` | `null` | no |
+| <a name="input_endpoint_type"></a> [endpoint\_type](#input\_endpoint\_type) | Endpoint type of the REST API, one of EDGE, REGIONAL or PRIVATE. If not set, the endpoint\_configuration block is omitted and AWS defaults to EDGE. | `string` | `null` | no |
 
 ## Outputs
 

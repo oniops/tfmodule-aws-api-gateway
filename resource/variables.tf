@@ -14,18 +14,6 @@ variable "parent_ids" {
   description = "IDs of the parent - 'rest_api_id' of the REST API and 'resource_id' of the parent resource. Pass the 'ids' output of the root module (for a top-level path) or of an upper resource module to chain the path hierarchy."
 }
 
-variable "rest_api_id" {
-  type        = string
-  description = "Deprecated: not referenced by this module. Use parent_ids.rest_api_id instead."
-  default     = null
-}
-
-variable "resource_id" {
-  type        = string
-  description = "Deprecated: not referenced by this module. Use parent_ids.resource_id instead."
-  default     = null
-}
-
 variable "path_part" {
   type        = string
   description = "Last path segment of this API resource (e.g., 'v1', 'users'). Use greedy path syntax like '{proxy+}' to define a proxy resource."

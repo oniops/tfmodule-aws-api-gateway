@@ -1,15 +1,17 @@
 data "aws_iam_policy_document" "assume_apigw" {
+  count = var.create_api_account ? 1 : 0
+
   statement {
-    sid    = ""
     effect = "Allow"
     principals {
       identifiers = ["apigateway.amazonaws.com"]
-      type = "Service"
+      type        = "Service"
     }
     actions = ["sts:AssumeRole"]
   }
 }
 
 data "aws_iam_policy" "apigw_cw" {
-  name = "AmazonAPIGatewayPushToCloudWatchLogs"
+  count = var.create_api_account ? 1 : 0
+  name  = "AmazonAPIGatewayPushToCloudWatchLogs"
 }
