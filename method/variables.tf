@@ -258,9 +258,15 @@ EOF
 }
 
 # Response
+variable "create_response" {
+  type        = bool
+  description = "If true, creates the method response and integration response along with the method. Set to false to manage responses outside this module (e.g., for proxy integrations that do not need explicit response mappings)."
+  default     = true
+}
+
 variable "status_code" {
   type        = string
-  description = "The HTTP status code of the method response. Defaults to '200' when the response resources are created and no value is given."
+  description = "The HTTP status code of the method response and integration response. Defaults to '200' when not set."
   default     = null
 }
 

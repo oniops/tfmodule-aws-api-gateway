@@ -1,3 +1,24 @@
+# stage
+
+구성된 REST API 를 배포(deployment)하고 호출 가능한 스테이지(예: `dev`, `prod`)로 노출하는 서브모듈 입니다.
+
+API Gateway 는 리소스·메서드를 정의하는 것만으로는 호출되지 않으며, 특정 시점의 정의를 스냅샷(deployment)으로 만들어 스테이지에 연결해야 엔드포인트가 활성화 됩니다.
+이 모듈은 배포와 스테이지를 만들고, 스테이지 단위의 운영 설정(액세스 로그, 메서드별 로깅·메트릭·캐시·스로틀링, 카나리, WAF)을 함께 관리 합니다.
+
+- 재배포는 `redeployment` 문자열의 해시가 바뀔 때 트리거 됩니다. API 를 정의한 파일 내용을 `jsonencode` 로 전달하는 것이 관례 입니다.
+- `enable_access_logs = true` 이면 CloudWatch 로그 그룹을 만들고 액세스 로그를 활성화 합니다.
+- `method_settings` 의 `logging_level`·`metrics_enabled` 는 루트 모듈의 `create_api_account` 로 계정 수준 CloudWatch 역할이 등록되어 있어야 동작 합니다.
+
+## Resources 역할
+
+| 리소스 | 역할 |
+| --- | --- |
+| `aws_api_gateway_deployment` | 현재 API 정의의 스냅샷을 만듭니다. 스테이지가 가리키는 대상이며 `redeployment` 해시 변경 시 새로 생성 됩니다 |
+| `aws_api_gateway_stage` | 배포를 호출 가능한 URL 로 노출하는 런타임 환경 입니다. 액세스 로그, X-Ray, 캐시 클러스터, 카나리 설정을 가집니다 |
+| `aws_api_gateway_method_settings` | 스테이지 내 메서드 경로(`*/*` 또는 특정 경로)별 로깅 레벨, 메트릭, 데이터 트레이스, 캐시, 스로틀링을 설정 합니다 |
+| `aws_cloudwatch_log_group` | 스테이지 액세스 로그 저장소 입니다. `enable_access_logs = true` 일 때 생성되며 `retention_in_days` 로 보존 기간을 정합니다 |
+| `aws_wafv2_web_acl_association` | `web_acl_arn` 지정 시 WAF(v2) Web ACL 을 스테이지에 연결 합니다 |
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

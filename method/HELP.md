@@ -1,3 +1,26 @@
+# method
+
+특정 API 리소스(경로)에 HTTP 메서드와 백엔드 통합을 정의하는 서브모듈 입니다.
+
+API Gateway 에서 하나의 엔드포인트는 "클라이언트 → 메서드 요청 → 통합 요청 → 백엔드 → 통합 응답 → 메서드 응답 → 클라이언트" 의 흐름으로 처리 됩니다.
+이 모듈은 이 네 단계를 한 번에 구성 합니다. 대상 리소스는 `parent_ids` 로 지정하며, 루트 모듈(`/`) 또는 `resource` 모듈의 `ids` 를 전달 합니다.
+
+- 통합 타입(`type`)으로 백엔드 종류를 선택 합니다. `HTTP`/`HTTP_PROXY` 는 HTTP 백엔드, `AWS`/`AWS_PROXY` 는 Lambda 등 AWS 서비스, `MOCK` 은 백엔드 없이 응답을 반환 합니다.
+  `*_PROXY` 는 요청·응답을 변환 없이 그대로 전달하고, 비 프록시 타입은 `request_templates`·`response_templates` 로 매핑을 정의 합니다.
+- VPC 내부 백엔드는 `connection_type = "VPC_LINK"` 와 `connection_id` 로 연결 합니다.
+- 인증은 `authorization`(기본 `NONE`)과 `authorizer_id`, `authorization_scopes`, `api_key_required` 로 지정 합니다.
+- 메서드 응답·통합 응답은 기본적으로 `200` 상태로 함께 생성되며, `create_response = false` 로 건너뛸 수 있습니다.
+- `MOCK` + `OPTIONS` 조합은 CORS Preflight 용도로 인식 합니다.
+
+## Resources 역할
+
+| 리소스 | 역할 |
+| --- | --- |
+| `aws_api_gateway_method` | 클라이언트가 호출하는 HTTP 메서드와 인증 방식, 요청 파라미터·모델·검증기를 정의 합니다 |
+| `aws_api_gateway_integration` | 메서드 요청을 어떤 백엔드로 어떻게 전달할지(타입, URI, 연결, 요청 매핑, 타임아웃, 캐시 키)를 정의 합니다 |
+| `aws_api_gateway_integration_response` | 백엔드 응답을 메서드 응답으로 매핑 합니다. `selection_pattern` 으로 응답을 선별하고 헤더·본문 변환을 정의 합니다 |
+| `aws_api_gateway_method_response` | 클라이언트에 반환할 상태 코드와 허용 응답 헤더·모델을 정의 합니다 |
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -39,6 +62,7 @@ No modules.
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Integration input's connectionType. Valid connection\_type is INTERNET or VPC\_LINK | `string` | `null` | no |
 | <a name="input_content_handling"></a> [content\_handling](#input\_content\_handling) | How to handle request payload content type conversions. Supported values are CONVERT\_TO\_BINARY and CONVERT\_TO\_TEXT. If not defined, payload will pass-through | `string` | `null` | no |
 | <a name="input_create"></a> [create](#input\_create) | If true, creates the method, integration, and their response resources. | `bool` | `true` | no |
+| <a name="input_create_response"></a> [create\_response](#input\_create\_response) | If true, creates the method response and integration response along with the method. Set to false to manage responses outside this module (e.g., for proxy integrations that do not need explicit response mappings). | `bool` | `true` | no |
 | <a name="input_http_method"></a> [http\_method](#input\_http\_method) | HTTP Method (GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY) | `string` | n/a | yes |
 | <a name="input_http_method_integration"></a> [http\_method\_integration](#input\_http\_method\_integration) | Integration HTTP method calling the backend, one of GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY, PATCH. Defaults to var.http\_method when not set (except for MOCK OPTIONS methods). Note that AWS service integrations such as Lambda can only be invoked via POST. | `string` | `null` | no |
 | <a name="input_integration_content_handling"></a> [integration\_content\_handling](#input\_integration\_content\_handling) | How to handle response payload content type conversions on the integration response. Supported values are CONVERT\_TO\_BINARY and CONVERT\_TO\_TEXT. If not defined, the response payload will pass through. | `string` | `null` | no |
@@ -55,7 +79,7 @@ No modules.
 | <a name="input_response_parameters"></a> [response\_parameters](#input\_response\_parameters) | A map of response parameters that can be sent to the caller.<br/><br/>For example:<br/>  response\_parameters = {<br/>    "method.response.header.X-Some-Header" = true<br/>  }<br/><br/>For CORS:<br/>  response\_parameters = {<br/>    "method.response.header.Access-Control-Allow-Origin"  = true,<br/>    "method.response.header.Access-Control-Allow-Methods" = true,<br/>    "method.response.header.Access-Control-Allow-Headers" = true<br/>  } | `map(string)` | `null` | no |
 | <a name="input_response_templates"></a> [response\_templates](#input\_response\_templates) | A map of response templates (by content type) used to transform the backend response payload before it is sent to the caller.<br/><br/>For example:<br/>  response\_templates = {<br/>      "application/xml" = <<-EOT<br/>  #set($inputRoot = $input.path('$'))<br/>  <?xml version="1.0" encoding="UTF-8"?><br/>  <message><br/>      $inputRoot.body<br/>  </message><br/>  EOT | `map(string)` | `null` | no |
 | <a name="input_selection_pattern"></a> [selection\_pattern](#input\_selection\_pattern) | Specifies the regular expression pattern used to choose an integration response based on the response from the backend.<br/>Omit configuring this to make the integration the default one.<br/><br/>For example:<br/>  selection\_pattern = "Invalid.*"<br/>  selection\_pattern = "2\\d{2}"<br/>  selection\_pattern = "4\\d{2}"<br/>  selection\_pattern = "5\\d{2}" | `string` | `null` | no |
-| <a name="input_status_code"></a> [status\_code](#input\_status\_code) | The HTTP status code of the method response. Defaults to '200' when the response resources are created and no value is given. | `string` | `null` | no |
+| <a name="input_status_code"></a> [status\_code](#input\_status\_code) | The HTTP status code of the method response and integration response. Defaults to '200' when not set. | `string` | `null` | no |
 | <a name="input_timeout_milliseconds"></a> [timeout\_milliseconds](#input\_timeout\_milliseconds) | Custom timeout between 50 and 29,000 milliseconds. The default value is 29,000 milliseconds. | `number` | `29000` | no |
 | <a name="input_type"></a> [type](#input\_type) | Integration input's type.<br/>An HTTP or HTTP\_PROXY integration with a connection\_type of VPC\_LINK is referred to as a private integration<br/>and uses a VpcLink to connect API Gateway to a network load balancer of a VPC.<br/><br/>Valid values<br/>  HTTP      : HTTP backends<br/>  HTTP\_PROXY: HTTP proxy integration<br/>  AWS       : AWS services<br/>  AWS\_PROXY : Lambda proxy integration<br/>  MOCK      : not calling any real backend | `string` | n/a | yes |
 | <a name="input_uri"></a> [uri](#input\_uri) | Input's URI. Required if type is AWS, AWS\_PROXY, HTTP or HTTP\_PROXY | `string` | `null` | no |

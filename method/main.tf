@@ -1,8 +1,8 @@
 locals {
   create          = var.create
   option_method   = var.type == "MOCK" && var.http_method == "OPTIONS"
-  create_response = local.create && (var.status_code == null || var.response_models != null || var.response_parameters != null)
-  status_code     = local.create_response && var.status_code == null ? "200" : var.status_code
+  create_response = local.create && var.create_response
+  status_code     = coalesce(var.status_code, "200")
 }
 
 resource "aws_api_gateway_method" "this" {

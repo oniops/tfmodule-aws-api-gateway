@@ -1,3 +1,19 @@
+# resource
+
+REST API 의 URL 경로(리소스) 한 단계를 생성하는 서브모듈 입니다.
+
+API Gateway REST API 는 `/v1/users/{id}` 처럼 경로를 트리 구조로 관리하며, 각 세그먼트가 하나의 리소스(`aws_api_gateway_resource`) 입니다.
+이 모듈은 상위 리소스 아래에 `path_part` 세그먼트 하나를 추가하고, 그 아래에 자식 경로나 메서드를 붙일 수 있도록 `ids` 를 출력 합니다.
+
+- 상위는 `parent_ids` 로 지정 합니다. 최상위 경로는 루트 모듈의 `ids`(루트 `/` 리소스), 그 아래 경로는 상위 `resource` 모듈의 `ids` 를 전달 합니다.
+- 경로 변수는 `{id}`, 하위 경로 전체를 받는 greedy 경로는 `{proxy+}` 형식으로 정의 합니다.
+
+## Resources 역할
+
+| 리소스 | 역할 |
+| --- | --- |
+| `aws_api_gateway_resource` | REST API 경로 트리에 세그먼트 하나를 추가 합니다. 메서드는 이 리소스에 연결 됩니다 |
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

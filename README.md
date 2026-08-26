@@ -15,7 +15,7 @@ variable "api_name"         { default = "demo" }
 variable "api_mapping_key"  { default = "demo/v1" }
 
 module "ctx" {
-  source  = "git::https://code.bespinglobal.com/scm/op/tfmodule-context.git?ref=v1.0.0"
+  source  = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.0.0"
   context = {
     project      = "demo"
     region       = "ap-northeast-2"
@@ -39,8 +39,10 @@ locals {
 }
 
 # ROOT
+# create_api_account 는 계정·리전당 하나만 존재하는 전역 설정입니다.
+# 스테이지에서 logging_level / metrics_enabled 를 사용하려면 같은 계정의 API 모듈 인스턴스 중 하나에서만 true 로 설정 합니다.
 module "api" {
-  source             = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2"
   context            = module.ctx.context
   api_name           = var.api_name
   create_api_account = false
@@ -48,14 +50,14 @@ module "api" {
 
 # /{proxy+}
 module "proxy" {
-  source     = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
   parent_ids = module.api.ids
   path_part  = "{proxy+}"
 }
 
 # /{proxy+}ANY
 module "proxyAny" {
-  source             = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
   parent_ids         = module.proxy.ids
   http_method        = "ANY"
   type               = "HTTP_PROXY"
@@ -77,7 +79,7 @@ module "proxyAny" {
 
 # deploy to stage
 module "stage" {
-  source             = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
   name               = local.deployed_stage
   api_name           = var.api_name
   context            = module.ctx.context
@@ -116,13 +118,14 @@ API Gateway 애플리케이션의 Endpoint 는 REGIONAL, EDGE, PRIVATE 을 대�
 - `EDGE` 는 글로벌과 연결되는 Client 를 위한 Endpoint 로 CloudFront 와 연결되므로 반드시 'us-east-1' 리전에 구성된 ACM 인증서가 필요     
 
 전체 도메인 이름은 `<public_domain_prefix>.<domain>` 으로 조합되며, `domain` 미지정 시 `context.domain` 을 사용 합니다.
-`exists_public_hosting_zone = true`(기본값) 인 경우 도메인의 public Route53 호스팅 존을 조회하여 alias A 레코드를 생성 합니다.
+ACM 인증서는 기본 도메인(`domain`) 이름으로 발급 완료(ISSUED) 상태의 최신 인증서를 조회하므로, 해당 인증서가 `<public_domain_prefix>.<domain>` 을 포함(예: `*.<domain>` 와일드카드)하고 있어야 합니다.
+`exists_public_hosting_zone = true`(기본값) 인 경우 도메인의 public Route53 호스팅 존을 조회하여 alias A 레코드를 생성 합니다. DNS 를 모듈 밖에서 관리하면 `false` 로 설정하고 `gateway_domain_name` 출력을 레코드 대상으로 사용 합니다.
 
 ```hcl
 
 # api.mycompany.com → API Gateway REGIONAL 커스텀 도메인
 module "domain" {
-  source               = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//domain"
+  source               = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//domain"
   context              = module.ctx.context
   public_domain_prefix = "api"
   endpoint_type        = "REGIONAL"
@@ -143,21 +146,21 @@ RESTFul 리소스는 Hierarchy 구조를 가지므로, `parent_ids` 속성으로
 
 # /v1
 module "v1" {
-  source     = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
   parent_ids = module.api.ids
   path_part  = "v1"
 }
 
 # /v1/users
 module "users" {
-  source     = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
   parent_ids = module.v1.ids
   path_part  = "users"
 }
 
 # /v1/users/{proxy+} - greedy path 는 `{proxy+}` 형식으로 정의 합니다.
 module "usersProxy" {
-  source     = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
   parent_ids = module.users.ids
   path_part  = "{proxy+}"
 }
@@ -172,13 +175,17 @@ API 리소스 주소를 대상으로 HTTP Method 및 Integration (통합) 방식
 HTTP 메서드를 통합 하기 위한 상위 리소스 `parent_ids` 를 지정 하여야 합니다.
 
 통합 타입(`type`)은 `HTTP`, `HTTP_PROXY`, `AWS`, `AWS_PROXY`, `MOCK` 을 지원 합니다.
-`authorization` 이 `CUSTOM` 또는 `COGNITO_USER_POOLS` 인 경우 `authorizer_id` 를 지정 합니다.
+`authorization` 기본값은 `NONE` 이며, `CUSTOM` 또는 `COGNITO_USER_POOLS` 인 경우 `authorizer_id` 를 지정 합니다.
+
+- 메서드 응답과 통합 응답은 기본적으로 `200` 상태 코드로 함께 생성 되며, `create_response = false` 로 생성을 건너뛸 수 있습니다. `status_code` 로 상태 코드를 바꾸거나 `response_models`, `response_parameters`, `integration_response_parameters`, `response_templates`, `selection_pattern` 으로 응답 형태를 정의 합니다.
+- 백엔드를 호출하는 HTTP 메서드(`http_method_integration`)는 지정하지 않으면 `http_method` 와 같은 값을 사용 합니다. Lambda 등 AWS 서비스 통합은 `POST` 로만 호출되므로 이 경우 명시 합니다.
+- `type = "MOCK"` 이고 `http_method = "OPTIONS"` 인 조합은 CORS Preflight 용도로 인식하여 백엔드 호출 메서드를 설정하지 않습니다.
 
 ```hcl
 
 # GET /v1/users → HTTP 백엔드 통합
 module "usersGet" {
-  source      = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
   parent_ids  = module.users.ids
   http_method = "GET"
   type        = "HTTP"
@@ -191,7 +198,7 @@ module "usersGet" {
 
 # OPTIONS /v1/users → MOCK 통합 (CORS Preflight)
 module "usersOptions" {
-  source      = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
   parent_ids  = module.users.ids
   http_method = "OPTIONS"
   type        = "MOCK"
@@ -226,13 +233,14 @@ API Gateway 리소스를 Stage 런타임 환경으로 배포 합니다.
 
 - `redeployment` 값의 SHA1 해시가 변경될 때마다 재배포가 트리거 됩니다. API 를 정의한 파일 내용을 `jsonencode` 로 전달하면 파일 변경 시 자동 재배포 됩니다.
 - `enable_access_logs = true` 인 경우 CloudWatch 로그 그룹(`/apigateway/{name_prefix}-{api_name}-api`)을 생성하고 액세스 로그를 활성화 합니다.
-- `method_settings` 는 스테이지 생성 시 항상 적용 됩니다. 단, `logging_level`·`metrics_enabled` 는 계정 수준 CloudWatch 역할(루트 모듈 `create_api_account`)이 구성되어 있어야 동작 합니다.
+- `method_settings` 는 기본값이 빈 목록이며, 지정한 항목만 스테이지에 적용 됩니다. `logging_level`·`metrics_enabled` 는 계정 수준 CloudWatch 역할(루트 모듈 `create_api_account`)이 구성되어 있어야 동작 합니다.
+- `api_name` 은 액세스 로그 그룹 이름을 만드는 데 사용되며, `null` 을 전달하면 스테이지 이름(`name`)으로 대체 됩니다.
 - `web_acl_arn` 을 지정하면 WAF(v2) Web ACL 을 스테이지에 연결 합니다.
 
 ```hcl
 
 module "stage" {
-  source             = "git::https://code.bespinglobal.com/scm/op/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
   context            = module.ctx.context
   name               = "dev"
   api_name           = var.api_name
