@@ -4,6 +4,7 @@
 /logs/
 /dist/
 /target/
+/examples/
 .terraform.lock.hcl
 *.tfstate.lock.info
 terraform.tfstate

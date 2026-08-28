@@ -15,7 +15,7 @@ variable "api_name"         { default = "demo" }
 variable "api_mapping_key"  { default = "demo/v1" }
 
 module "ctx" {
-  source  = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.0.0"
+  source  = "git::https://github.com/oniops/tfmodule-context.git?ref=v1.3.5"
   context = {
     project      = "demo"
     region       = "ap-northeast-2"
@@ -42,7 +42,7 @@ locals {
 # create_api_account 는 계정·리전당 하나만 존재하는 전역 설정입니다.
 # 스테이지에서 logging_level / metrics_enabled 를 사용하려면 같은 계정의 API 모듈 인스턴스 중 하나에서만 true 로 설정 합니다.
 module "api" {
-  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3"
   context            = module.ctx.context
   api_name           = var.api_name
   create_api_account = false
@@ -50,14 +50,14 @@ module "api" {
 
 # /{proxy+}
 module "proxy" {
-  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//resource"
   parent_ids = module.api.ids
   path_part  = "{proxy+}"
 }
 
 # /{proxy+}ANY
 module "proxyAny" {
-  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//method"
   parent_ids         = module.proxy.ids
   http_method        = "ANY"
   type               = "HTTP_PROXY"
@@ -79,7 +79,7 @@ module "proxyAny" {
 
 # deploy to stage
 module "stage" {
-  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//stage"
   name               = local.deployed_stage
   api_name           = var.api_name
   context            = module.ctx.context
@@ -125,7 +125,7 @@ ACM 인증서는 기본 도메인(`domain`) 이름으로 발급 완료(ISSUED) �
 
 # api.mycompany.com → API Gateway REGIONAL 커스텀 도메인
 module "domain" {
-  source               = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//domain"
+  source               = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//domain"
   context              = module.ctx.context
   public_domain_prefix = "api"
   endpoint_type        = "REGIONAL"
@@ -146,21 +146,21 @@ RESTFul 리소스는 Hierarchy 구조를 가지므로, `parent_ids` 속성으로
 
 # /v1
 module "v1" {
-  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//resource"
   parent_ids = module.api.ids
   path_part  = "v1"
 }
 
 # /v1/users
 module "users" {
-  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//resource"
   parent_ids = module.v1.ids
   path_part  = "users"
 }
 
 # /v1/users/{proxy+} - greedy path 는 `{proxy+}` 형식으로 정의 합니다.
 module "usersProxy" {
-  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//resource"
+  source     = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//resource"
   parent_ids = module.users.ids
   path_part  = "{proxy+}"
 }
@@ -185,7 +185,7 @@ HTTP 메서드를 통합 하기 위한 상위 리소스 `parent_ids` 를 지정 
 
 # GET /v1/users → HTTP 백엔드 통합
 module "usersGet" {
-  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//method"
   parent_ids  = module.users.ids
   http_method = "GET"
   type        = "HTTP"
@@ -198,7 +198,7 @@ module "usersGet" {
 
 # OPTIONS /v1/users → MOCK 통합 (CORS Preflight)
 module "usersOptions" {
-  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//method"
+  source      = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//method"
   parent_ids  = module.users.ids
   http_method = "OPTIONS"
   type        = "MOCK"
@@ -240,7 +240,7 @@ API Gateway 리소스를 Stage 런타임 환경으로 배포 합니다.
 ```hcl
 
 module "stage" {
-  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.2//stage"
+  source             = "git::https://github.com/oniops/tfmodule-aws-api-gateway.git?ref=v1.2.3//stage"
   context            = module.ctx.context
   name               = "dev"
   api_name           = var.api_name
