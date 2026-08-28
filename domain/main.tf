@@ -1,9 +1,6 @@
 locals {
-  name_prefix           = var.context.name_prefix
   tags                  = var.context.tags
-  #nlb_name              = format("%s-openapi-nlb", local.name_prefix)
-  #vpc_link_name         = format("%s-openapi", local.name_prefix)
-  domain_name           = "${var.public_domain_prefix}.${(var.domain == null ? var.context.domain : var.domain)}"
+  domain_name           = "${var.public_domain_prefix}.${coalesce(var.domain, var.context.domain)}"
   create_route53_record = var.exists_public_hosting_zone
 }
 
@@ -23,14 +20,14 @@ resource "aws_api_gateway_domain_name" "regional" {
 
 resource "aws_route53_record" "regional" {
   count   = local.create_route53_record && var.endpoint_type == "REGIONAL" ? 1 : 0
-  name    = concat(aws_api_gateway_domain_name.regional.*.domain_name, [""])[0]
+  name    = aws_api_gateway_domain_name.regional[0].domain_name
   type    = "A"
-  zone_id = concat(data.aws_route53_zone.public.*.zone_id, [""])[0]
+  zone_id = data.aws_route53_zone.public[0].zone_id
 
   alias {
     evaluate_target_health = true
-    name                   = concat(aws_api_gateway_domain_name.regional.*.regional_domain_name, [""])[0]
-    zone_id                = concat(aws_api_gateway_domain_name.regional.*.regional_zone_id, [""])[0]
+    name                   = aws_api_gateway_domain_name.regional[0].regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.regional[0].regional_zone_id
   }
 }
 
@@ -50,13 +47,13 @@ resource "aws_api_gateway_domain_name" "edge" {
 
 resource "aws_route53_record" "edge" {
   count   = local.create_route53_record && var.endpoint_type == "EDGE" ? 1 : 0
-  name    = concat(aws_api_gateway_domain_name.edge.*.domain_name, [""])[0]
+  name    = aws_api_gateway_domain_name.edge[0].domain_name
   type    = "A"
-  zone_id = concat(data.aws_route53_zone.public.*.zone_id, [""])[0]
+  zone_id = data.aws_route53_zone.public[0].zone_id
 
   alias {
     evaluate_target_health = true
-    name                   = concat(aws_api_gateway_domain_name.edge.*.cloudfront_domain_name, [""])[0]
-    zone_id                = concat(aws_api_gateway_domain_name.edge.*.cloudfront_zone_id, [""])[0]
+    name                   = aws_api_gateway_domain_name.edge[0].cloudfront_domain_name
+    zone_id                = aws_api_gateway_domain_name.edge[0].cloudfront_zone_id
   }
 }

@@ -1,12 +1,12 @@
 locals {
-  integration_http_method = var.http_method_integration != null ? var.http_method_integration : local.option_method ? null : var.http_method
+  integration_http_method = var.http_method_integration != null ? var.http_method_integration : (local.option_method ? null : var.http_method)
 }
 
 resource "aws_api_gateway_integration" "this" {
   count                   = local.create ? 1 : 0
   rest_api_id             = var.parent_ids.rest_api_id
   resource_id             = var.parent_ids.resource_id
-  http_method             = concat(aws_api_gateway_method.this.*.http_method, [""])[0]
+  http_method             = aws_api_gateway_method.this[0].http_method
   integration_http_method = local.integration_http_method
   type                    = var.type
   connection_type         = var.connection_type
@@ -19,23 +19,20 @@ resource "aws_api_gateway_integration" "this" {
   passthrough_behavior    = var.passthrough_behavior
   cache_key_parameters    = var.cache_key_parameters
   cache_namespace         = var.cache_namespace
-  # credentials
-  # tls_config
 }
 
 resource "aws_api_gateway_integration_response" "this" {
   count               = local.create_response ? 1 : 0
   rest_api_id         = var.parent_ids.rest_api_id
   resource_id         = var.parent_ids.resource_id
-  http_method         = one(aws_api_gateway_method.this.*.http_method)
-  status_code         = one(aws_api_gateway_method_response.this.*.status_code)
+  http_method         = aws_api_gateway_method.this[0].http_method
+  status_code         = aws_api_gateway_method_response.this[0].status_code
   selection_pattern   = var.selection_pattern
   response_parameters = var.integration_response_parameters
   content_handling    = var.integration_content_handling
   response_templates  = var.response_templates
 
   depends_on = [
-    aws_api_gateway_method_response.this,
-    aws_api_gateway_integration.this
+    aws_api_gateway_integration.this,
   ]
 }

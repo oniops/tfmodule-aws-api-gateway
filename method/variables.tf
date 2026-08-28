@@ -1,7 +1,8 @@
 # for aws_api_gateway_method
 variable "create" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "If true, creates the method, integration, and their response resources."
+  default     = true
 }
 
 # for aws_api_gateway_method
@@ -10,26 +11,14 @@ variable "parent_ids" {
     resource_id = string
     rest_api_id = string
   })
-  description = "The Resource ID and API Instance ID of the REST API"
+  description = "IDs of the parent - 'rest_api_id' of the REST API and 'resource_id' of the API resource to attach the method to. Pass the 'ids' output of the root module or of a resource module."
 }
-
-#variable "rest_api_id" {
-#  type        = string
-#  description = "The Resource Instance ID of the REST API"
-#  default     = null
-#}
-#
-#variable "resource_id" {
-#  type        = string
-#  description = "The Resource ID of the REST API"
-#  default     = null
-#}
 
 variable "http_method" {
   type        = string
   description = "HTTP Method (GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY)"
   validation {
-    condition = contains(["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "ANY"], var.http_method)
+    condition     = contains(["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "ANY"], var.http_method)
     error_message = "Valid http_method is one of GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY"
   }
 }
@@ -38,18 +27,18 @@ variable "authorization" {
   type        = string
   description = "Type of authorization used for the method (NONE, CUSTOM, AWS_IAM, COGNITO_USER_POOLS)"
   default     = "NONE"
+  validation {
+    condition     = contains(["NONE", "CUSTOM", "AWS_IAM", "COGNITO_USER_POOLS"], var.authorization)
+    error_message = "Valid authorization is one of NONE, CUSTOM, AWS_IAM or COGNITO_USER_POOLS."
+  }
 }
-
 
 variable "authorizer_id" {
   type        = string
   default     = ""
-  #  validation {
-  #    condition     = contains(["CUSTOM", "COGNITO_USER_POOLS"], var.authorization) && var.authorizer_id == null
-  #    error_message = "Require setting the authorizer_id when the authorization is CUSTOM or COGNITO_USER_POOLS"
-  #  }
   description = <<EOF
-Authorizer id to be used when the authorization is CUSTOM or COGNITO_USER_POOLS
+Authorizer id to be used when the authorization is CUSTOM or COGNITO_USER_POOLS.
+An empty string is treated as unset (null).
 
 Ex)
   authorizer_id = aws_api_gateway_authorizer.this.id
@@ -58,7 +47,7 @@ EOF
 }
 
 variable "request_parameters" {
-  type = map(bool)
+  type        = map(bool)
   description = <<EOF
 Map of request parameters (from the path, query string and headers) that should be passed to the integration.
 
@@ -74,7 +63,7 @@ EOF
 }
 
 variable "authorization_scopes" {
-  type = list(string)
+  type        = list(string)
   description = <<EOF
 Authorization scopes used when the authorization is `COGNITO_USER_POOLS`.
 
@@ -98,7 +87,7 @@ variable "operation_name" {
 }
 
 variable "request_models" {
-  type = map(string)
+  type        = map(string)
   description = <<EOF
 Map of the API models used for the request's content type where key is the content type (built-in model are Error and Empty.
 
@@ -113,7 +102,7 @@ EOF
 
 variable "request_validator_id" {
   type        = string
-  description = " ID of a aws_api_gateway_request_validator"
+  description = "The ID of an aws_api_gateway_request_validator to validate the request body and parameters."
   default     = null
 }
 
@@ -135,7 +124,7 @@ Valid values
 EOF
 
   validation {
-    condition = contains(["HTTP", "HTTP_PROXY", "AWS", "AWS_PROXY", "MOCK"], var.type)
+    condition     = contains(["HTTP", "HTTP_PROXY", "AWS", "AWS_PROXY", "MOCK"], var.type)
     error_message = "Valid api-gateway integration type is one of HTTP, HTTP_PROXY, AWS, AWS_PROXY or MOCK."
   }
 }
@@ -144,6 +133,10 @@ variable "connection_type" {
   type        = string
   description = "Integration input's connectionType. Valid connection_type is INTERNET or VPC_LINK"
   default     = null
+  validation {
+    condition     = contains(["INTERNET", "VPC_LINK"], coalesce(var.connection_type, "INTERNET"))
+    error_message = "Valid connection_type is one of INTERNET or VPC_LINK."
+  }
 }
 
 variable "connection_id" {
@@ -159,7 +152,7 @@ variable "timeout_milliseconds" {
 }
 
 variable "request_parameters_integration" {
-  type = map(string)
+  type        = map(string)
   description = <<EOF
 Map of request query string parameters and headers that should be passed to the backend responder.
 
@@ -176,7 +169,7 @@ EOF
 }
 
 variable "request_templates" {
-  type        = map
+  type        = map(any)
   description = <<EOF
 Map of the integration's payload request templates.
 
@@ -215,15 +208,14 @@ variable "content_handling" {
   description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
   default     = null
   validation {
-    condition = var.content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.content_handling))
-    #  var.content_handling == "CONVERT_TO_TEXT" #  contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], var.content_handling+"")
+    condition     = contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], coalesce(var.content_handling, "CONVERT_TO_TEXT"))
     error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }
 
 variable "http_method_integration" {
   type        = string
-  description = "HTTP Method one of GET, POST, PUT, DELETE, HEAD, OPTIONs, ANY and PATCH. but AWS integrations. e.g., Lambda function can only be invoked via POST"
+  description = "Integration HTTP method calling the backend, one of GET, POST, PUT, DELETE, HEAD, OPTIONS, ANY, PATCH. Defaults to var.http_method when not set (except for MOCK OPTIONS methods). Note that AWS service integrations such as Lambda can only be invoked via POST."
   default     = null
 }
 
@@ -238,7 +230,7 @@ variable "passthrough_behavior" {
   description = "Integration passthrough behavior (WHEN_NO_MATCH, WHEN_NO_TEMPLATES, NEVER). Required if request_templates is used."
   default     = "WHEN_NO_MATCH"
   validation {
-    condition = contains(["WHEN_NO_MATCH", "WHEN_NO_TEMPLATES", "NEVER"], var.passthrough_behavior)
+    condition     = contains(["WHEN_NO_MATCH", "WHEN_NO_TEMPLATES", "NEVER"], var.passthrough_behavior)
     error_message = "Valid passthrough_behavior is one of WHEN_NO_MATCH, WHEN_NO_TEMPLATES or NEVER."
   }
 }
@@ -250,7 +242,7 @@ variable "cache_namespace" {
 }
 
 variable "cache_key_parameters" {
-  type = list(string)
+  type        = list(string)
   description = <<EOF
 List of cache key parameters for the integration. Support only for GET method, TTL value between 300 and 3600 seconds, Default is 300.
 see - https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html
@@ -266,14 +258,20 @@ EOF
 }
 
 # Response
+variable "create_response" {
+  type        = bool
+  description = "If true, creates the method response and integration response along with the method. Set to false to manage responses outside this module (e.g., for proxy integrations that do not need explicit response mappings)."
+  default     = true
+}
+
 variable "status_code" {
   type        = string
-  description = "The HTTP status code"
+  description = "The HTTP status code of the method response and integration response. Defaults to '200' when not set."
   default     = null
 }
 
 variable "response_models" {
-  type = map(string)
+  type        = map(string)
   description = <<EOF
 A map of the API models used for the response's content type
 
@@ -287,7 +285,7 @@ EOF
 }
 
 variable "response_parameters" {
-  type = map(string)
+  type        = map(string)
   description = <<EOF
 A map of response parameters that can be sent to the caller.
 
@@ -308,9 +306,9 @@ EOF
 }
 
 variable "response_templates" {
-  type = map(string)
+  type        = map(string)
   description = <<-EOF
-A map of response parameters that can be sent to the caller.
+A map of response templates (by content type) used to transform the backend response payload before it is sent to the caller.
 
 For example:
   response_templates = {
@@ -323,16 +321,16 @@ For example:
   EOT
 
 EOF
-  default = null
+  default     = null
 }
 
 variable "integration_response_parameters" {
-  type = map(string)
+  type        = map(string)
   description = <<EOF
-A map of response parameters that can be sent to the caller.
+A map of integration response parameters that maps backend or static values to method response headers sent to the caller.
 
 For example:
-  response_parameters_integration = {
+  integration_response_parameters = {
     "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
 
@@ -366,10 +364,10 @@ EOF
 
 variable "integration_content_handling" {
   type        = string
-  description = "How to handle request payload content type conversions. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, payload will pass-through"
+  description = "How to handle response payload content type conversions on the integration response. Supported values are CONVERT_TO_BINARY and CONVERT_TO_TEXT. If not defined, the response payload will pass through."
   default     = null
   validation {
-    condition = var.integration_content_handling == null || can(regex("^(CONVERT_TO_TEXT|CONVERT_TO_BINARY)$", var.integration_content_handling))
-    error_message = "Valid content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
+    condition     = contains(["CONVERT_TO_TEXT", "CONVERT_TO_BINARY"], coalesce(var.integration_content_handling, "CONVERT_TO_TEXT"))
+    error_message = "Valid integration_content_handling is one of CONVERT_TO_TEXT or CONVERT_TO_BINARY."
   }
 }

@@ -4,29 +4,30 @@ variable "context" {
 }
 
 variable "create" {
-  type    = bool
-  default = true
+  type        = bool
+  description = "If true, creates the deployment, stage, method settings, log group, and WAF association."
+  default     = true
 }
 
 variable "name" {
   type        = string
-  description = "The name of stage"
+  description = "The name of the stage (e.g., dev, stg, prod). Used as the stage_name and the Name tag."
 }
 
 variable "api_name" {
   type        = string
-  description = "The name of API Gateway"
+  description = "The name of the API Gateway, used to build the access-log CloudWatch log group name '/apigateway/{name_prefix}-{api_name}-api'. If set to null, var.name is used instead."
 }
 
 variable "description" {
   type        = string
-  description = "The description of stage"
+  description = "The description of the stage."
   default     = null
 }
 
 variable "deployment_description" {
   type        = string
-  description = "The deployment description of stage"
+  description = "The description of the deployment (aws_api_gateway_deployment)."
   default     = null
 }
 
@@ -56,13 +57,14 @@ variable "cache_cluster_enabled" {
 
 variable "rest_api_id" {
   type        = string
-  description = "The Resource Instance ID of the REST API"
+  description = "The ID of the REST API to deploy to this stage."
 }
 
 variable "redeployment" {
   type        = string
   description = <<EOF
-This will only trigger redeployment if anything changed in listed files."
+Arbitrary string used as the redeployment trigger. The API is redeployed whenever the SHA1 hash of this value changes.
+Typically pass the jsonencode-d contents of the files that define the API, so that any change to them triggers redeployment.
 
 Ex)
   redeployment = jsonencode([
@@ -76,7 +78,7 @@ EOF
 
 variable "enable_access_logs" {
   type        = bool
-  description = "Enabled access logs for Stage"
+  description = "If true, creates a CloudWatch log group and enables access logging on the stage."
   default     = false
 }
 
@@ -86,24 +88,11 @@ variable "access_log_format" {
   default     = "{\"requestId\":\"$context.requestId\", \"extendedRequestId\":\"$context.extendedRequestId\", \"ip\": \"$context.identity.sourceIp\", \"caller\":\"$context.identity.caller\", \"user\":\"$context.identity.user\", \"requestTime\":\"$context.requestTime\", \"httpMethod\":\"$context.httpMethod\", \"resourcePath\":\"$context.resourcePath\", \"status\":\"$context.status\", \"protocol\":\"$context.protocol\", \"responseLength\":\"$context.responseLength\"}"
 }
 
-variable "access_log_level" {
-  type        = string
-  description = "access logging level. Valid access_log_level is one of OFF, INFO or ERROR."
-  default     = "OFF"
-}
-
 variable "retention_in_days" {
-  description = "cloudwatch log group retention_in_days"
+  description = "Retention period (in days) of the access-log CloudWatch log group."
   type        = number
   default     = 90
 }
-
-variable "logging_level" {
-  type        = string
-  description = "Type of authorization used for the method (NONE, CUSTOM, AWS_IAM, COGNITO_USER_POOLS)"
-  default     = "OFF"
-}
-
 
 variable "canary_deployment" {
   description = "Flag to decide whether canary deployment exist."
@@ -125,8 +114,8 @@ variable "use_stage_cache" {
 
 variable "canary_variables" {
   description = "(Optional) Map of overridden stage variables (including new variables) for the canary deployment."
-  type = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
 }
 
 variable "deployment_id" {
@@ -136,18 +125,15 @@ variable "deployment_id" {
 }
 
 
-#variable "resource_id" {
-#  type        = string
-#  description = "API resource ID"
-#}
-#
-
 variable "method_settings" {
   type = list(object({
     method_path = string
-    settings = map(any)
+    settings    = map(any)
   }))
   description = <<EOF
+List of method settings applied to the stage (aws_api_gateway_method_settings). Each entry consists of a
+'method_path' (e.g., "*/*" for all methods) and a 'settings' map. Note that logging_level and metrics require
+the account-level CloudWatch role to be configured (see 'create_api_account' of the root module).
 
 Ex)
   method_settings    = [
@@ -171,26 +157,7 @@ Ex)
   # logging_level is one of OFF, ERROR, INFO
   # unauthorized_cache_control_header_strategy is one of FAIL_WITH_403, SUCCEED_WITH_RESPONSE_HEADER, SUCCEED_WITHOUT_RESPONSE_HEADER
 EOF
-  default = []
-}
-
-variable "settings" {
-  description = "http method settings for api"
-  type = set(object(
-    {
-      cache_data_encrypted                       = bool
-      cache_ttl_in_seconds                       = number
-      caching_enabled                            = bool
-      data_trace_enabled                         = bool
-      logging_level                              = string
-      metrics_enabled                            = bool
-      require_authorization_for_cache_control    = bool
-      throttling_burst_limit                     = number
-      throttling_rate_limit                      = number
-      unauthorized_cache_control_header_strategy = string
-    }
-  ))
-  default = []
+  default     = []
 }
 
 variable "web_acl_arn" {
